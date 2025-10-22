@@ -1,5 +1,7 @@
 plugins {
     id("java")
+    application
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "joamonca.reactinator"
@@ -16,13 +18,29 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.jetbrains:annotations:24.1.0")
 
-    implementation("net.dv8tion:JDA:$jdaVersion") { // replace $version with the latest version
-        // Optionally disable audio natives to reduce jar size by excluding `opus-java` and `tink`
-        exclude(module="opus-java") // required for encoding audio into opus, not needed if audio is already provided in opus encoding
-        exclude(module="tink") // required for encrypting and decrypting audio
+    implementation("net.dv8tion:JDA:$jdaVersion") {
+        exclude(module = "opus-java")
+        exclude(module = "tink")
     }
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+
+// Main class discovered in your repo:
+// src/main/java/joamonca/reactinator/Main.java
+application {
+    mainClass.set("joamonca.reactinator.Main")
+}
+
+// Configure the fat jar
+tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
+    archiveClassifier.set("all")
+    // Helps when libraries use service files (safe for most cases)
+    mergeServiceFiles()
+    // Ensure the jar is runnable with `java -jar`
+    manifest {
+        attributes("Main-Class" to application.mainClass.get())
+    }
 }
