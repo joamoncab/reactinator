@@ -25,7 +25,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build shadow jar
-        run: ./gradlew --no-daemon clean shadowJar
+        run: chmod +x gradlew && ./gradlew --no-daemon clean shadowJar
 
       - name: Upload fat jar artifact
         uses: actions/upload-artifact@v4
