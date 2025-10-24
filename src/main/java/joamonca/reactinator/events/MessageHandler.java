@@ -24,6 +24,9 @@ public class MessageHandler extends ListenerAdapter {
             // This is a message from a server
             if (reader.isTargetID(author.getId()))
             {
+                if (Math.random() >= reader.getSpawnChance(author.getId())) {
+                    return;
+                }
                 var emojiData = reader.getEmoji(author.getId());
                 if (emojiData != null) {
                     event.getMessage().addReaction(

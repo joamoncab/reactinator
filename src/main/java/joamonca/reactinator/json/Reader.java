@@ -66,4 +66,19 @@ public class Reader {
         }
         return null;
     }
+
+    public float getSpawnChance(String id) {
+        try {
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject messageConfig = jsonArray.getJSONObject(i);
+                if (String.valueOf(messageConfig.getLong("id")).equals(id)) {
+                    return messageConfig.getFloat("chances");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 1f;
+        }
+        return 0.0f;
+    }
 }
