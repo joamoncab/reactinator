@@ -6,9 +6,11 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import java.util.Random;
 
 public class MessageHandler extends ListenerAdapter {
     Reader reader;
+    Random random;
     public MessageHandler(Reader reader) {
         this.reader = reader;
     }
@@ -18,13 +20,18 @@ public class MessageHandler extends ListenerAdapter {
         // The user who sent the message
         User author = event.getAuthor();
 
+        this.random = new Random(event.getAuthor().getIdLong() +
+                System.currentTimeMillis() +
+                event.getMessage().getIdLong() +
+                event.getChannel().getIdLong());
+
         // Check whether the message was sent in a guild / server
         if (event.isFromGuild())
         {
             // This is a message from a server
             if (reader.isTargetID(author.getId()))
             {
-                if (Math.random() >= reader.getSpawnChance(author.getId())) {
+                if (random.nextFloat() >= reader.getSpawnChance(author.getId())) {
                     return;
                 }
                 var emojiData = reader.getEmoji(author.getId());
