@@ -1,26 +1,34 @@
 package joamonca.reactinator;
 
+import joamonca.reactinator.events.MessageHandler;
+import joamonca.reactinator.json.Reader;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import org.jetbrains.annotations.NotNull;
-import java.io.IOException;
+
 import java.util.EnumSet;
 
-public class Main extends ListenerAdapter
+public class Main
 {
-    public static final Emoji EMOJI = Emoji.fromCustom("cb", 1430584363082584278L, false);
+    static Emoji EMOJI;
     static String targetID;
 
-    public static void main(String[] args) throws IOException
-    {
+    public static void main(String[] args) {
+        // we keep the bot token in an environment variable for security reasons
         String token = System.getenv("TOKEN");
-        targetID = System.getenv("TARGET_ID");
+
+        // load a json file to allow more cool config!! (multiple target IDs, emojis, etc)
+        Reader reader = new Reader("config.json");
+        if (!reader.OpenFile()){
+            System.out.println("Failed to open config file. Falling back to env variables.");
+            // load from env as fallback
+            targetID = System.getenv("TARGET_ID");
+            EMOJI = Emoji.fromCustom("cb", 1430584363082584278L, false);
+            return;
+        }
 
         EnumSet<GatewayIntent> intents = EnumSet.of(
                 // Enables MessageReceivedEvent for guild (also known as servers)
@@ -35,8 +43,9 @@ public class Main extends ListenerAdapter
             // and only enable the provided set of intents. All other intents are disabled, so you won't receive events for those.
             JDA jda = JDABuilder.createLight(token, intents)
                     // On this builder, you are adding all your event listeners and session configuration
-                    .addEventListeners(new Main())
+                    .addEventListeners(new MessageHandler(reader))
                     .setActivity(Activity.watching("messages to react"))
+                    .setStatus(OnlineStatus.IDLE)
                     .build();
 
             jda.getRestPing().queue(ping ->
@@ -51,23 +60,6 @@ public class Main extends ListenerAdapter
         {
             // Thrown if the awaitReady() call is interrupted
             e.printStackTrace();
-        }
-    }
-
-    // This overrides the method called onMessageReceived in the ListenerAdapter class
-    // Your IDE (such as intellij or eclipse) can automatically generate this override for you, by simply typing "onMessage" and auto-completing it!
-    @Override
-    public void onMessageReceived(@NotNull MessageReceivedEvent event)
-    {
-        // The user who sent the message
-        User author = event.getAuthor();
-
-        // Check whether the message was sent in a guild / server
-        if (event.isFromGuild())
-        {
-            // This is a message from a server
-            if (author.getId().equals(targetID))
-                event.getMessage().addReaction(EMOJI).queue();
         }
     }
 }

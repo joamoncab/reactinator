@@ -5,8 +5,9 @@ plugins {
 }
 
 group = "joamonca.reactinator"
-version = "1.0-SNAPSHOT"
+version = "1.0.1"
 val jdaVersion = "6.1.0"
+val jsonVersion = "20250517"
 
 repositories {
     mavenCentral()
@@ -17,6 +18,9 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.jetbrains:annotations:24.1.0")
+
+    // https://mvnrepository.com/artifact/org.json/json
+    implementation("org.json:json:$jsonVersion")
 
     implementation("net.dv8tion:JDA:$jdaVersion") {
         exclude(module = "opus-java")
