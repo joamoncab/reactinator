@@ -15,7 +15,8 @@ public class Main
     public static void main(String[] args) {
         // we keep the bot token in an environment variable for security reasons
         String token = System.getenv("TOKEN");
-        float chance = System.getenv("CHANCE") != null ? Float.parseFloat(System.getenv("CHANCE")) : 0.1f;
+        String authorizedUser = System.getenv("AUTHORIZED_USER");
+        final float DEFAULT_CHANCE = System.getenv("CHANCE") != null ? Float.parseFloat(System.getenv("CHANCE")) : 0.01f;
 
         EnumSet<GatewayIntent> intents = EnumSet.of(
                 // Enables MessageReceivedEvent for guild (also known as servers)
@@ -31,8 +32,8 @@ public class Main
             JDA jda = JDABuilder.createLight(token, intents)
                     .enableCache(CacheFlag.EMOJI)
                     // On this builder, you are adding all your event listeners and session configuration
-                    .addEventListeners(new MessageHandler(chance))
-                    .setActivity(Activity.customStatus("behold the reactinator!!! | chance: " + (chance * 100) + "%"))
+                    .addEventListeners(new MessageHandler(DEFAULT_CHANCE, authorizedUser))
+                    .setActivity(Activity.customStatus("behold the reactinator!!! | chances: " + (DEFAULT_CHANCE * 100) + "%"))
                     .setStatus(OnlineStatus.IDLE)
                     .build();
 
