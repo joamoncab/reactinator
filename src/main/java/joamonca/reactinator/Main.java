@@ -31,7 +31,7 @@ public class Main
             JDA jda = JDABuilder.createLight(token, intents)
                     // On this builder, you are adding all your event listeners and session configuration
                     .addEventListeners(new MessageHandler(CHANCE))
-                    .setActivity(Activity.watching("messages to react"))
+                    .setActivity(Activity.customStatus("behold the reactinator!!!"))
                     .setStatus(OnlineStatus.IDLE)
                     .build();
 
