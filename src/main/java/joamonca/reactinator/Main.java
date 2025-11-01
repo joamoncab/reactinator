@@ -1,34 +1,21 @@
 package joamonca.reactinator;
 
 import joamonca.reactinator.events.MessageHandler;
-import joamonca.reactinator.json.Reader;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 
 import java.util.EnumSet;
 
 public class Main
 {
-    static Emoji EMOJI;
-    static String targetID;
+    private static final float CHANCE = 0.01f;
 
     public static void main(String[] args) {
         // we keep the bot token in an environment variable for security reasons
         String token = System.getenv("TOKEN");
-
-        // load a json file to allow more cool config!! (multiple target IDs, emojis, etc)
-        Reader reader = new Reader("config.json");
-        if (!reader.OpenFile()){
-            System.out.println("Failed to open config file. Falling back to env variables.");
-            // load from env as fallback
-            targetID = System.getenv("TARGET_ID");
-            EMOJI = Emoji.fromCustom("cb", 1430584363082584278L, false);
-            return;
-        }
 
         EnumSet<GatewayIntent> intents = EnumSet.of(
                 // Enables MessageReceivedEvent for guild (also known as servers)
@@ -43,7 +30,7 @@ public class Main
             // and only enable the provided set of intents. All other intents are disabled, so you won't receive events for those.
             JDA jda = JDABuilder.createLight(token, intents)
                     // On this builder, you are adding all your event listeners and session configuration
-                    .addEventListeners(new MessageHandler(reader))
+                    .addEventListeners(new MessageHandler(CHANCE))
                     .setActivity(Activity.watching("messages to react"))
                     .setStatus(OnlineStatus.IDLE)
                     .build();
