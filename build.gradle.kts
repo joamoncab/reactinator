@@ -5,9 +5,10 @@ plugins {
 }
 
 group = "joamonca.reactinator"
-version = "1.0.4"
+version = "1.1.0"
 val jdaVersion = "6.1.0"
 val jsonVersion = "20250517"
+val mysqlVersion = "9.4.0"
 
 repositories {
     mavenCentral()
@@ -21,6 +22,9 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.json/json
     implementation("org.json:json:$jsonVersion")
+
+    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+    implementation("com.mysql:mysql-connector-j:${mysqlVersion}")
 
     implementation("net.dv8tion:JDA:$jdaVersion") {
         exclude(module = "opus-java")

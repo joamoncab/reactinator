@@ -1,5 +1,8 @@
 package joamonca.reactinator.events;
 
+import joamonca.reactinator.database.ReactDB;
+import joamonca.reactinator.util.Slash;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -17,12 +20,12 @@ import static net.dv8tion.jda.api.entities.Activity.customStatus;
 
 public class MessageHandler extends ListenerAdapter {
     private final Random random = new Random();
-    private float chance;
+    private ReactDB reactDB;
     private String authorized;
 
-    public MessageHandler(float chance, String authorized) {
+    public MessageHandler(ReactDB reactDB, String authorized) {
         this.authorized = authorized;
-        this.chance = chance;
+        this.reactDB = reactDB;
     }
 
     @Override
@@ -31,11 +34,20 @@ public class MessageHandler extends ListenerAdapter {
             return;
         }
 
-        // Register slash command (only needs to be done once per guild), discord DOES NOT like it when you do this on every message
-        /*event.getGuild().updateCommands().addCommands(
-                Commands.slash("setchance", "Set the chance of reacting to a message.")
-                        .addOption(OptionType.NUMBER, "chance", "The chance (%) of reacting to a message.", true)
-        ).queue();*/
+        // Register slash command (only needs to be done once per guild)
+        // discord DOES NOT like it when you do this on every message
+
+        float chance = reactDB.getChances(event.getGuild().getIdLong());
+
+        if (chance == -1f) {
+            event.getGuild().updateCommands().addCommands(
+                    Commands.slash("setchance", "Set the chance of reacting to a message.")
+                            .addOption(OptionType.NUMBER, "chance", "The chance (%) of reacting to a message.", true),
+                    Commands.slash("chances", "Get the current chance of reacting to a message.")
+            ).queue();
+            reactDB.setChances(event.getGuild().getIdLong(), 0.01f); // set default chance to 1%
+            return;
+        }
 
         if (random.nextFloat() > chance) {
             return;
@@ -50,22 +62,14 @@ public class MessageHandler extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (event.getName().equals("setchance")) {
-            if (!event.getUser().getId().equals(authorized)) {
-                event.reply("You are not authorized to use this command.").setEphemeral(true).queue();
-                return;
+        if (!event.isFromGuild()) return;
+        switch (event.getName()) {
+            case "setchance" -> {
+                Slash.setChance(event, reactDB, authorized);
             }
-            float newChance = (float) event.getOption("chance").getAsDouble() / 100;
-            if (newChance < 0 || newChance > 1) {
-                event.reply("Chance must be between 0 and 100.").setEphemeral(true).queue();
-                return;
+            case "chances" -> {
+                Slash.getChance(event, reactDB);
             }
-            // Note: This change is not persistent and will reset when the bot restarts
-            chance = newChance;
-            event.reply("Chance updated to " + (newChance * 100) + "%").setEphemeral(true).queue();
-            event.getJDA().getSelfUser().getJDA().getPresence().setActivity(
-                    Activity.customStatus("behold the reactinator!!! | chances: " + (newChance * 100) + "%")
-            );
         }
     }
 }
