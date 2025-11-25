@@ -16,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.Random;
 
+import static joamonca.reactinator.util.Cats.getCatEmojis;
+import static joamonca.reactinator.util.Cats.isCatChannel;
 import static net.dv8tion.jda.api.entities.Activity.customStatus;
 
 public class MessageHandler extends ListenerAdapter {
@@ -47,6 +49,15 @@ public class MessageHandler extends ListenerAdapter {
             ).queue();
             reactDB.setChances(event.getGuild().getIdLong(), 0.01f); // set default chance to 1%
             return;
+        }
+
+        // uses only cat emojis in cat channels
+        if (isCatChannel(event.getChannel().getName())) {
+            List<RichCustomEmoji> emojis = event.getGuild().getEmojis();
+            // filter only cat emojis
+            emojis = getCatEmojis(emojis);
+            RichCustomEmoji emojiToUse = emojis.get(random.nextInt(emojis.size()));
+            event.getMessage().addReaction(emojiToUse).queue();
         }
 
         if (random.nextFloat() > chance) {
