@@ -23,7 +23,8 @@ public class Main
                 // Enables MessageReceivedEvent for guild (also known as servers)
                 GatewayIntent.GUILD_MESSAGES,
                 // Allows access to server emojis and stickers
-                GatewayIntent.GUILD_EXPRESSIONS
+                GatewayIntent.GUILD_EXPRESSIONS,
+                GatewayIntent.MESSAGE_CONTENT // behold the silly
         );
 
         try

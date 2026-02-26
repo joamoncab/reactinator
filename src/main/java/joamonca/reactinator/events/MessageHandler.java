@@ -1,6 +1,8 @@
 package joamonca.reactinator.events;
 
+import joamonca.reactinator.ai.AIHandler;
 import joamonca.reactinator.database.ReactDB;
+import joamonca.reactinator.reactions.MakeReaciton;
 import joamonca.reactinator.util.Slash;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
@@ -13,6 +15,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Random;
 
@@ -51,24 +54,23 @@ public class MessageHandler extends ListenerAdapter {
             return;
         }
 
-        // uses only cat emojis in cat channels
-        if (isCatChannel(event.getChannel().getName())) {
-            List<RichCustomEmoji> emojis = event.getGuild().getEmojis();
-            // filter only cat emojis
-            emojis = getCatEmojis(emojis);
-            RichCustomEmoji emojiToUse = emojis.get(random.nextInt(emojis.size()));
-            event.getMessage().addReaction(emojiToUse).queue();
+        if (event.getMessage().getContentRaw().contains(MessageFormat.format("<@{0}>", event.getJDA().getSelfUser().getId()))
+        || event.getMessage().getMentions().isMentioned(event.getJDA().getSelfUser())) {
+            new AIHandler(event).use();
         }
 
         if (random.nextFloat() > chance) {
             return;
         }
 
-        List<RichCustomEmoji> emojis = event.getGuild().getEmojis();
-        if (!emojis.isEmpty()) {
-            RichCustomEmoji emojiToUse = emojis.get(random.nextInt(emojis.size()));
-            event.getMessage().addReaction(emojiToUse).queue();
+        // uses only cat emojis in cat channels
+        if (isCatChannel(event.getChannel().getName())) {
+            List<RichCustomEmoji> emojis = event.getGuild().getEmojis();
+            // filter only cat emojis
+            new MakeReaciton(event).react(getCatEmojis(emojis));
         }
+
+        new MakeReaciton(event).react(null);
     }
 
     @Override
