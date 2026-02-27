@@ -55,7 +55,14 @@ public class MessageHandler extends ListenerAdapter {
         }
 
         if (event.getMessage().getContentRaw().contains(MessageFormat.format("<@{0}>", event.getJDA().getSelfUser().getId()))
-        || event.getMessage().getMentions().isMentioned(event.getJDA().getSelfUser())) {
+                && event.getMessage().getReferencedMessage() != null) {
+            // if you ping him replying to other person it enables the silly
+            new AIHandler(event).useSilly();
+        }
+
+        if (event.getMessage().getContentRaw().contains(MessageFormat.format("<@{0}>", event.getJDA().getSelfUser().getId()))
+        || event.getMessage().getMentions().isMentioned(event.getJDA().getSelfUser())
+        && event.getMessage().getReferencedMessage() == null) {
             new AIHandler(event).use();
         }
 
