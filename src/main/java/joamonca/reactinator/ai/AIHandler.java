@@ -21,6 +21,9 @@ public class AIHandler {
         String message = event.getMessage().getContentRaw().trim().toLowerCase();
         if (message.contains("how") || message.contains("why")) {
             reply("idk");
+        } else if (message.contains("mpreg")) {
+            reply("gonna react u");
+            event.getMessage().addReaction(Emoji.fromUnicode("\uD83E\uDEC3")).queue();
         } else if (message.contains("peak")) {
             reply("as always");
         } else if (message.contains("present") || message.contains("who")) {
@@ -33,9 +36,6 @@ public class AIHandler {
             reply("meanie :(");
         } else if (message.contains("not the moment")) {
             reply("not my problem");
-        } else if (message.contains("mpreg")) {
-            reply("gonna react u");
-            event.getMessage().addReaction(Emoji.fromUnicode("\uD83E\uDEC3")).queue();
         } else if (message.contains("do") && message.contains("agree")) {
             reply("mayhaps");
         }  else if (message.contains("ai") || message.contains("clanker")) {
@@ -52,7 +52,7 @@ public class AIHandler {
         } else if (message.contains("right") || message.contains("fact") || message.contains("check")) {
             sendMedia("check-mark.mp3", null);
         } else {
-            use();
+            reply("yea idk about that one");
         }
     }
 
