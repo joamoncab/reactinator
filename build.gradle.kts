@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "joamonca.reactinator"
-version = "1.1.0"
+version = "1.1.1"
 val jdaVersion = "6.1.0"
 val jsonVersion = "20250517"
 val mysqlVersion = "9.4.0"
