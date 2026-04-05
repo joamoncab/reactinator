@@ -55,6 +55,7 @@ public class MessageHandler extends ListenerAdapter {
         }
 
         if (event.getMessage().getMentions().isMentioned(event.getJDA().getSelfUser())) {
+            if (event.getMessage().getAuthor().equals(event.getJDA().getSelfUser())) return; // ignore self but not other bots
             AIHandler aiHandler = new AIHandler(event);
             if (event.getMessage().getReferencedMessage() == null) {
                 aiHandler.use();
