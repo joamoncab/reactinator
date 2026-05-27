@@ -1,6 +1,7 @@
 package joamonca.reactinator.ai;
 
 import joamonca.reactinator.reactions.MakeReaciton;
+import joamonca.reactinator.util.Parser;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -8,8 +9,14 @@ import okhttp3.MediaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+
+import java.net.URL;
 
 public class AIHandler {
     MessageReceivedEvent event;
@@ -45,14 +52,16 @@ public class AIHandler {
         }
     }
 
-    public void useSilly() {
+    public void useSilly(String soundSource) throws IOException {
         String message = event.getMessage().getContentRaw().trim().toLowerCase();
         if (message.contains("buzzer") || message.contains("wrong")) {
             sendMedia("extremely-loud-incorrect-buzzer.mp3", null);
         } else if (message.contains("right") || message.contains("fact") || message.contains("check")) {
             sendMedia("check-mark.mp3", null);
         } else {
-            reply("yea idk about that one");
+            sendMediaFromUrl(soundSource + new Parser(soundSource + "/en/search/?name=" + URLEncoder.encode(
+                    event.getMessage().getContentRaw().replaceAll("<@!?\\d+>|<@&\\d+>|<#\\d+>", "").trim(),
+                    StandardCharsets.UTF_8)).getMediaUrl(), null);
         }
     }
 
@@ -78,4 +87,29 @@ public class AIHandler {
                 .setMessageReference(event.getMessage().getReferencedMessage())
                 .queue();
     }
+
+    private void sendMediaFromUrl(@NotNull String urlString, @Nullable String message) {
+        if (message == null) {
+            message = "";
+        }
+
+        try {
+            java.net.URL url = new java.net.URI(urlString).toURL();
+            String fileName = urlString.substring(urlString.lastIndexOf('/') + 1);
+            if (!fileName.contains(".mp3")) {
+                fileName = "audio.mp3";
+            }
+
+            InputStream inputStream = url.openStream();
+            event.getChannel().sendMessage(message)
+                    .addFiles(FileUpload.fromData(inputStream, fileName))
+                    .setMessageReference(event.getMessage().getReferencedMessage())
+                    .queue();
+
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+
 }

@@ -9,6 +9,7 @@ version = "1.1.1"
 val jdaVersion = "6.1.0"
 val jsonVersion = "20250517"
 val mysqlVersion = "9.4.0"
+val jsoupVersion = "1.22.2"
 
 repositories {
     mavenCentral()
@@ -26,10 +27,10 @@ dependencies {
     // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation("com.mysql:mysql-connector-j:${mysqlVersion}")
 
-    implementation("net.dv8tion:JDA:$jdaVersion") {
-        exclude(module = "opus-java")
-        exclude(module = "tink")
-    }
+    implementation("net.dv8tion:JDA:$jdaVersion")
+
+    // jsoup HTML parser library @ https://jsoup.org/
+    implementation("org.jsoup:jsoup:$jsoupVersion")
 }
 
 tasks.test {

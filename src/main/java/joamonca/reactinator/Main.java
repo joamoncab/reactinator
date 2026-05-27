@@ -18,6 +18,7 @@ public class Main
         String token = System.getenv("TOKEN");
         String authorizedUser = System.getenv("AUTHORIZED_USER");
         String dbUri = System.getenv("DB_URI");
+        String soundsSource = System.getenv("FETCH_URL");
 
         EnumSet<GatewayIntent> intents = EnumSet.of(
                 // Enables MessageReceivedEvent for guild (also known as servers)
@@ -36,7 +37,7 @@ public class Main
             JDA jda = JDABuilder.createLight(token, intents)
                     .enableCache(CacheFlag.EMOJI)
                     // On this builder, you are adding all your event listeners and session configuration
-                    .addEventListeners(new MessageHandler(reactDB, authorizedUser))
+                    .addEventListeners(new MessageHandler(reactDB, authorizedUser, soundsSource))
                     .setActivity(Activity.customStatus("behold the reactinator!!!"))
                     .setStatus(OnlineStatus.IDLE)
                     .build();

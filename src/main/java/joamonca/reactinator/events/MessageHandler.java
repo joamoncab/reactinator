@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Random;
@@ -27,10 +28,12 @@ public class MessageHandler extends ListenerAdapter {
     private final Random random = new Random();
     private ReactDB reactDB;
     private String authorized;
+    private String soundsSource;
 
-    public MessageHandler(ReactDB reactDB, String authorized) {
+    public MessageHandler(ReactDB reactDB, String authorized, String soundsSource) {
         this.authorized = authorized;
         this.reactDB = reactDB;
+        this.soundsSource = soundsSource;
     }
 
     @Override
@@ -58,7 +61,12 @@ public class MessageHandler extends ListenerAdapter {
             if (event.getMessage().getAuthor().equals(event.getJDA().getSelfUser())) return; // ignore self but not other bots
             AIHandler aiHandler = new AIHandler(event);
             if (event.getMessage().getReferencedMessage() != null && !event.getMessage().getReferencedMessage().getAuthor().equals(event.getJDA().getSelfUser())) {
-                aiHandler.useSilly();
+                try {
+                    aiHandler.useSilly(soundsSource);
+                } catch (IOException e) {
+                    System.out.println(e.getMessage());
+                    aiHandler.use();
+                }
             } else {
                 aiHandler.use();
             }
