@@ -73,9 +73,9 @@ public class MessageHandler extends ListenerAdapter {
             List<RichCustomEmoji> emojis = event.getGuild().getEmojis();
             // filter only cat emojis
             new MakeReaciton(event).react(getCatEmojis(emojis));
+        } else {
+            new MakeReaciton(event).react(null);
         }
-
-        new MakeReaciton(event).react(null);
     }
 
     @Override
