@@ -4,31 +4,25 @@ import joamonca.reactinator.ai.AIHandler;
 import joamonca.reactinator.database.ReactDB;
 import joamonca.reactinator.reactions.MakeReaciton;
 import joamonca.reactinator.util.Slash;
-import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static joamonca.reactinator.util.Cats.getCatEmojis;
 import static joamonca.reactinator.util.Cats.isCatChannel;
-import static net.dv8tion.jda.api.entities.Activity.customStatus;
 
 public class MessageHandler extends ListenerAdapter {
-    private final Random random = new Random();
-    private ReactDB reactDB;
-    private String authorized;
-    private String soundsSource;
+    private final ReactDB reactDB;
+    private final String authorized;
+    private final String soundsSource;
 
     public MessageHandler(ReactDB reactDB, String authorized, String soundsSource) {
         this.authorized = authorized;
@@ -59,20 +53,19 @@ public class MessageHandler extends ListenerAdapter {
 
         if (event.getMessage().getMentions().isMentioned(event.getJDA().getSelfUser())) {
             if (event.getMessage().getAuthor().equals(event.getJDA().getSelfUser())) return; // ignore self but not other bots
-            AIHandler aiHandler = new AIHandler(event);
             if (event.getMessage().getReferencedMessage() != null && !event.getMessage().getReferencedMessage().getAuthor().equals(event.getJDA().getSelfUser())) {
                 try {
-                    aiHandler.useSilly(soundsSource);
+                    AIHandler.useSilly(event, soundsSource);
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
-                    aiHandler.use();
+                    AIHandler.use(event);
                 }
             } else {
-                aiHandler.use();
+                AIHandler.use(event);
             }
         }
 
-        if (random.nextFloat() > chance) {
+        if (ThreadLocalRandom.current().nextFloat() > chance) {
             return;
         }
 
@@ -80,9 +73,9 @@ public class MessageHandler extends ListenerAdapter {
         if (isCatChannel(event.getChannel().getName())) {
             List<RichCustomEmoji> emojis = event.getGuild().getEmojis();
             // filter only cat emojis
-            new MakeReaciton(event).react(getCatEmojis(emojis));
+            MakeReaciton.react(event, getCatEmojis(emojis));
         } else {
-            new MakeReaciton(event).react(null);
+            MakeReaciton.react(event, null);
         }
     }
 
@@ -98,4 +91,4 @@ public class MessageHandler extends ListenerAdapter {
             }
         }
     }
-}
+}

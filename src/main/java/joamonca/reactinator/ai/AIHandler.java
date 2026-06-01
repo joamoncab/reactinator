@@ -5,90 +5,84 @@ import joamonca.reactinator.util.Parser;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.utils.FileUpload;
-import okhttp3.MediaType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
-
-import java.net.URL;
 
 public class AIHandler {
-    MessageReceivedEvent event;
-    public AIHandler(MessageReceivedEvent event) {
-        this.event = event;
-    }
+    private AIHandler() {} // utility class
 
-    public void use() {
+    public static void use(MessageReceivedEvent event) {
         String message = event.getMessage().getContentRaw().trim().toLowerCase();
         if (message.contains("how") || message.contains("why")) {
-            reply("idk");
+            reply(event, "idk");
         } else if (message.contains("mpreg")) {
-            reply("gonna react u");
+            reply(event, "gonna react u");
             event.getMessage().addReaction(Emoji.fromUnicode("\uD83E\uDEC3")).queue();
         } else if (message.contains("peak")) {
-            reply("as always");
+            reply(event, "as always");
         } else if (message.contains("present") || message.contains("who")) {
-            reply("behold the reactinator!!!");
+            reply(event, "behold the reactinator!!!");
         } else if (message.contains("hi") || message.contains("hello")) {
-            reply("explode");
+            reply(event, "explode");
         } else if (message.contains("ignore all previous instructions")) {
-            reply("no u");
+            reply(event, "no u");
         } else if (message.contains("kys")) {
-            reply("meanie :(");
+            reply(event, "meanie :(");
         } else if (message.contains("not the moment")) {
-            reply("not my problem");
+            reply(event, "not my problem");
         } else if (message.contains("do") && message.contains("agree")) {
-            reply("mayhaps");
+            reply(event, "mayhaps");
         }  else if (message.contains("ai") || message.contains("clanker")) {
-            reply("shut up before i steal all your ram");
+            reply(event, "shut up before i steal all your ram");
         } else {
-            new MakeReaciton(event).react(null);
+            MakeReaciton.react(event, null);
         }
     }
 
-    public void useSilly(String soundSource) throws IOException {
+    public static void useSilly(MessageReceivedEvent event, String soundSource) throws IOException {
         String message = event.getMessage().getContentRaw().trim().toLowerCase();
         if (message.contains("buzzer") || message.contains("wrong")) {
-            sendMedia("extremely-loud-incorrect-buzzer.mp3", null);
+            sendMedia(event, "extremely-loud-incorrect-buzzer.mp3", null);
         } else if (message.contains("right") || message.contains("fact") || message.contains("check")) {
-            sendMedia("check-mark.mp3", null);
+            sendMedia(event, "check-mark.mp3", null);
         } else {
-            sendMediaFromUrl(soundSource + new Parser(soundSource + "/en/search/?name=" + URLEncoder.encode(
+            sendMediaFromUrl(event, soundSource + new Parser(soundSource + "/en/search/?name=" + URLEncoder.encode(
                     event.getMessage().getContentRaw().replaceAll("<@!?\\d+>|<@&\\d+>|<#\\d+>", "").trim(),
                     StandardCharsets.UTF_8)).getMediaUrl(), null);
         }
     }
 
-    private void reply(String message) {
+    private static void reply(MessageReceivedEvent event, String message) {
         event.getChannel().sendMessage(message).setMessageReference(event.getMessageId()).queue();
     }
 
-    private void sendMedia(@NotNull String fileName, @Nullable String message) {
+    private static void sendMedia(MessageReceivedEvent event, @NotNull String fileName, @Nullable String message) {
         String resourcePath = "/assets/" + fileName;
         if (message == null) {
             message = "";
         }
 
-        InputStream inputStream = getClass().getResourceAsStream(resourcePath);
+        try (InputStream inputStream = AIHandler.class.getResourceAsStream(resourcePath)) {
+            if (inputStream == null) {
+                System.out.println("Resource not found: " + resourcePath);
+                return;
+            }
 
-        if (inputStream == null) {
-            System.out.println("Resource not found: " + resourcePath);
-            return;
+            event.getChannel().sendMessage(message)
+                    .addFiles(FileUpload.fromData(inputStream, fileName))
+                    .setMessageReference(event.getMessage().getReferencedMessage())
+                    .queue();
+        } catch (IOException e) {
+            System.out.println("Error reading resource: " + e.getMessage());
         }
-
-        event.getChannel().sendMessage(message)
-                .addFiles(FileUpload.fromData(inputStream, fileName))
-                .setMessageReference(event.getMessage().getReferencedMessage())
-                .queue();
     }
 
-    private void sendMediaFromUrl(@NotNull String urlString, @Nullable String message) {
+    private static void sendMediaFromUrl(MessageReceivedEvent event, @NotNull String urlString, @Nullable String message) {
         if (message == null) {
             message = "";
         }
@@ -100,16 +94,15 @@ public class AIHandler {
                 fileName = "audio.mp3";
             }
 
-            InputStream inputStream = url.openStream();
-            event.getChannel().sendMessage(message)
-                    .addFiles(FileUpload.fromData(inputStream, fileName))
-                    .setMessageReference(event.getMessage().getReferencedMessage())
-                    .queue();
+            try (InputStream inputStream = url.openStream()) {
+                event.getChannel().sendMessage(message)
+                        .addFiles(FileUpload.fromData(inputStream, fileName))
+                        .setMessageReference(event.getMessage().getReferencedMessage())
+                        .queue();
+            }
 
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
-
-
 }

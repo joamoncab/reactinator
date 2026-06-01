@@ -32,6 +32,9 @@ public class Main
         {
             ReactDB reactDB = new ReactDB(dbUri);
 
+            // Ensure the database connection is closed on shutdown
+            Runtime.getRuntime().addShutdownHook(new Thread(reactDB::close));
+
             // By using createLight(token, intents), we use a minimalistic cache profile (lower ram usage)
             // and only enable the provided set of intents. All other intents are disabled, so you won't receive events for those.
             JDA jda = JDABuilder.createLight(token, intents)
