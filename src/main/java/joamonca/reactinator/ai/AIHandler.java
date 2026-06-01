@@ -52,7 +52,7 @@ public class AIHandler {
             sendMedia(event, "check-mark.mp3", null);
         } else {
             sendMediaFromUrl(event, soundSource + new Parser(soundSource + "/en/search/?name=" + URLEncoder.encode(
-                    event.getMessage().getContentRaw().replaceAll("<@!?\\d+>|<@&\\d+>|<#\\d+>", "").trim(),
+                    event.getMessage().getContentRaw().replaceAll("<@!?\\\\d+>|<@&\\\\d+>|<#\\\\d+>", "").trim(),
                     StandardCharsets.UTF_8)).getMediaUrl(), null);
         }
     }
@@ -73,8 +73,9 @@ public class AIHandler {
                 return;
             }
 
+            byte[] data = inputStream.readAllBytes();
             event.getChannel().sendMessage(message)
-                    .addFiles(FileUpload.fromData(inputStream, fileName))
+                    .addFiles(FileUpload.fromData(data, fileName))
                     .setMessageReference(event.getMessage().getReferencedMessage())
                     .queue();
         } catch (IOException e) {
@@ -95,8 +96,9 @@ public class AIHandler {
             }
 
             try (InputStream inputStream = url.openStream()) {
+                byte[] data = inputStream.readAllBytes();
                 event.getChannel().sendMessage(message)
-                        .addFiles(FileUpload.fromData(inputStream, fileName))
+                        .addFiles(FileUpload.fromData(data, fileName))
                         .setMessageReference(event.getMessage().getReferencedMessage())
                         .queue();
             }
