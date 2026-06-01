@@ -13,11 +13,17 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import static joamonca.reactinator.util.Cats.getCatEmojis;
+
 public class AIHandler {
     private AIHandler() {} // utility class
 
+    private static String stripMentions(String raw) {
+        return raw.replaceAll("<@[!&]?\\d+>|<#\\d+>", "").trim();
+    }
+
     public static void use(MessageReceivedEvent event) {
-        String message = event.getMessage().getContentRaw().trim().toLowerCase();
+        String message = stripMentions(event.getMessage().getContentRaw()).toLowerCase();
         if (message.contains("how") || message.contains("why")) {
             reply(event, "idk");
         } else if (message.contains("mpreg")) {
@@ -37,22 +43,29 @@ public class AIHandler {
             reply(event, "not my problem");
         } else if (message.contains("do") && message.contains("agree")) {
             reply(event, "mayhaps");
-        }  else if (message.contains("ai") || message.contains("clanker")) {
+        } else if (message.contains("ai") || message.contains("clanker")) {
             reply(event, "shut up before i steal all your ram");
+        } else if (message.contains("ban")) {
+            reply(event, "banned");
+            MakeReaciton.react(event, null);
+        } else if (message.contains("cat") || message.contains("meow")) {
+            reply(event, "meow");
+            MakeReaciton.react(event, getCatEmojis(event.getGuild().getEmojis()));
         } else {
             MakeReaciton.react(event, null);
         }
     }
 
     public static void useSilly(MessageReceivedEvent event, String soundSource) throws IOException {
-        String message = event.getMessage().getContentRaw().trim().toLowerCase();
+        String stripped = stripMentions(event.getMessage().getContentRaw());
+        String message = stripped.toLowerCase();
         if (message.contains("buzzer") || message.contains("wrong")) {
             sendMedia(event, "extremely-loud-incorrect-buzzer.mp3", null);
         } else if (message.contains("right") || message.contains("fact") || message.contains("check")) {
             sendMedia(event, "check-mark.mp3", null);
         } else {
             sendMediaFromUrl(event, soundSource + new Parser(soundSource + "/en/search/?name=" + URLEncoder.encode(
-                    event.getMessage().getContentRaw().replaceAll("<@!?\\\\d+>|<@&\\\\d+>|<#\\\\d+>", "").trim(),
+                    stripped,
                     StandardCharsets.UTF_8)).getMediaUrl(), null);
         }
     }
