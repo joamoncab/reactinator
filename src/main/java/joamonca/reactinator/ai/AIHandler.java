@@ -65,7 +65,7 @@ public class AIHandler {
             sendMedia(event, "extremely-loud-incorrect-buzzer.mp3", null);
         } else if (message.contains("right") || message.contains("fact") || message.contains("check")) {
             sendMedia(event, "check-mark.mp3", null);
-        } else if (message.contains("bwa")) {
+        } else if (message.contains("bwaa")) {
             sendMedia(event, "bwaa.mp4", null);
         } else {
             sendMediaFromUrl(event, soundSource + new Parser(soundSource + "/en/search/?name=" + URLEncoder.encode(
