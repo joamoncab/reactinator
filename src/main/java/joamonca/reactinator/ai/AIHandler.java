@@ -51,6 +51,8 @@ public class AIHandler {
         } else if (message.contains("cat") || message.contains("meow")) {
             reply(event, "meow");
             MakeReaciton.react(event, getCatEmojis(event.getGuild().getEmojis()));
+        } else if (message.contains("bwa")) {
+            sendMedia(event, "bwaa.mp4", null);
         } else {
             MakeReaciton.react(event, null);
         }
@@ -63,6 +65,8 @@ public class AIHandler {
             sendMedia(event, "extremely-loud-incorrect-buzzer.mp3", null);
         } else if (message.contains("right") || message.contains("fact") || message.contains("check")) {
             sendMedia(event, "check-mark.mp3", null);
+        } else if (message.contains("bwa")) {
+            sendMedia(event, "bwaa.mp4", null);
         } else {
             sendMediaFromUrl(event, soundSource + new Parser(soundSource + "/en/search/?name=" + URLEncoder.encode(
                     stripped,
