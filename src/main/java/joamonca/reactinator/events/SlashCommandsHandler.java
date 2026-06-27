@@ -6,8 +6,6 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import static joamonca.reactinator.util.send.Messages.replySlash;
-
 public class SlashCommandsHandler extends ListenerAdapter {
     private final Database database;
     private final String authorized;
@@ -21,7 +19,7 @@ public class SlashCommandsHandler extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (database.isBlacklisted(event.getUser().getIdLong())) {
-            replySlash(event, "you are blacklisted from using this bot. what have you done?", true);
+            event.reply("you are blacklisted from using this bot. what have you done?").setEphemeral(true).queue();
             return;
         }
         new SlashDispatcher(event, database, authorized, soundsSource);

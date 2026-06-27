@@ -11,6 +11,7 @@ public class GetChance implements BotCommand {
     @Override
     public void execute(CommandDataObject data) {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
+        event.deferReply(true).queue();
         OptionMapping channelOpt = event.getOption("channel");
 
         long channelId = (channelOpt != null) ? channelOpt.getAsChannel().getIdLong() : event.getChannel().getIdLong();

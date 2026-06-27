@@ -16,6 +16,7 @@ public class BlacklistEmoji implements BotCommand {
     @Override
     public void execute(CommandDataObject data) {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
+        event.deferReply(true).queue();
         if (!(event.getUser().getId().equals(data.ownerID()) || event.getMember().hasPermission(Permission.MESSAGE_MANAGE))) {
             replySlash(event, "you are not authorized to use this command.", true);
             return;

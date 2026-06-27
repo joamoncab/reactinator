@@ -10,6 +10,7 @@ public class Blacklist implements BotCommand {
     @Override
     public void execute(CommandDataObject data) {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
+        event.deferReply(true).queue();
         if (!event.getUser().getId().equals(data.ownerID())) {
             replySlash(event, "you are not authorized to use this command.", true);
             return;

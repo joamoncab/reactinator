@@ -10,6 +10,7 @@ public class OptOut implements BotCommand {
     @Override
     public void execute(CommandDataObject data) {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
+        event.deferReply(true).queue();
         String type = event.getOption("type").getAsString();
         long userId = event.getUser().getIdLong();
 

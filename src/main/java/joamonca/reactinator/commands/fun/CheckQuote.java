@@ -12,6 +12,7 @@ public class CheckQuote implements BotCommand {
     @Override
     public void execute(CommandDataObject data) {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
+        event.deferReply().queue();
         OptionMapping signatureOpt = event.getOption("signature");
 
         if (signatureOpt == null) {
@@ -20,7 +21,6 @@ public class CheckQuote implements BotCommand {
         }
 
         long signature = signatureOpt.getAsLong();
-        event.deferReply().queue();
 
         QuoteTamperInfo info = data.database().getQuoteTamper(signature);
 
