@@ -5,10 +5,10 @@ plugins {
 }
 
 group = "joamonca.reactinator"
-version = "1.2.0"
-val jdaVersion = "6.1.0"
-val jsonVersion = "20250517"
-val mysqlVersion = "9.4.0"
+version = "2.0.0"
+val jdaVersion = "6.4.2"
+val jsonVersion = "20260522"
+val mysqlVersion = "9.7.0"
 val jsoupVersion = "1.22.2"
 
 repositories {
@@ -27,6 +27,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation("com.mysql:mysql-connector-j:${mysqlVersion}")
 
+    // https://central.sonatype.com/artifact/net.dv8tion/JDA
     implementation("net.dv8tion:JDA:$jdaVersion")
 
     // jsoup HTML parser library @ https://jsoup.org/
@@ -37,8 +38,6 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// Main class discovered in your repo:
-// src/main/java/joamonca/reactinator/Main.java
 application {
     mainClass.set("joamonca.reactinator.Main")
 }

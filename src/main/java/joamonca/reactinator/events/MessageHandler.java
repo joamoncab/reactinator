@@ -1,33 +1,28 @@
 package joamonca.reactinator.events;
 
-import joamonca.reactinator.ai.AIHandler;
-import joamonca.reactinator.database.ReactDB;
-import joamonca.reactinator.reactions.MakeReaciton;
-import joamonca.reactinator.util.Slash;
-import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import joamonca.reactinator.commands.TextDispatcher;
+import joamonca.reactinator.commands._meta.CommandsList;
+import joamonca.reactinator.util.get.Database;
+import joamonca.reactinator.util.send.Reactions;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static joamonca.reactinator.util.Cats.getCatEmojis;
-import static joamonca.reactinator.util.Cats.isCatChannel;
+import static joamonca.reactinator.util.process.Cats.isCatChannel;
 
 public class MessageHandler extends ListenerAdapter {
-    private final ReactDB reactDB;
-    private final String authorized;
+    private final Database database;
     private final String soundsSource;
+    private final String slashVersion;
 
-    public MessageHandler(ReactDB reactDB, String authorized, String soundsSource) {
-        this.authorized = authorized;
-        this.reactDB = reactDB;
+    public MessageHandler(Database database, String soundsSource, String slashVersion) {
+        this.database = database;
         this.soundsSource = soundsSource;
+        this.slashVersion = slashVersion;
     }
 
     @Override
@@ -36,59 +31,69 @@ public class MessageHandler extends ListenerAdapter {
             return;
         }
 
-        // Register slash command (only needs to be done once per guild)
-        // discord DOES NOT like it when you do this on every message
+        long guildId = event.getGuild().getIdLong();
+        int guildChance = database.getGuildChances(guildId);
 
-        float chance = reactDB.getChances(event.getGuild().getIdLong());
-
-        if (chance == -1f) {
-            event.getGuild().updateCommands().addCommands(
-                    Commands.slash("setchance", "Set the chance of reacting to a message.")
-                            .addOption(OptionType.NUMBER, "chance", "The chance (%) of reacting to a message.", true),
-                    Commands.slash("chances", "Get the current chance of reacting to a message.")
-            ).queue();
-            reactDB.setChances(event.getGuild().getIdLong(), 0.01f); // set default chance to 1%
+        // no guild records, create all data
+        if (guildChance == -1) {
+            database.ensureGuild(guildId);
+            if (slashVersion != null) {
+                database.setSlashVer(guildId, slashVersion);
+            }
+            updateGuildSlashCommands(event);
             return;
         }
+
+        // update slash commands, if needed (discord is just like that idk)
+        if (slashVersion != null) {
+            String dbVer = database.getSlashVer(guildId);
+            if (dbVer == null || !dbVer.equals(slashVersion)) {
+                database.setSlashVer(guildId, slashVersion);
+                updateGuildSlashCommands(event);
+            }
+        }
+
+        // haha blacklisted
+        if (database.isBlacklisted(event.getAuthor().getIdLong())) return;
 
         if (event.getMessage().getMentions().isMentioned(event.getJDA().getSelfUser())) {
-            if (event.getMessage().getAuthor().equals(event.getJDA().getSelfUser())) return; // ignore self but not other bots
+            if (event.getMessage().getAuthor().equals(event.getJDA().getSelfUser())) return; // ignore self but not other bots (very important for the silly)
             if (event.getMessage().getReferencedMessage() != null && !event.getMessage().getReferencedMessage().getAuthor().equals(event.getJDA().getSelfUser())) {
                 try {
-                    AIHandler.useSilly(event, soundsSource);
+                    TextDispatcher.useSilly(event, soundsSource);
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
-                    AIHandler.use(event);
+                    TextDispatcher.use(event, database);
                 }
             } else {
-                AIHandler.use(event);
+                TextDispatcher.use(event, database);
             }
         }
 
-        if (ThreadLocalRandom.current().nextFloat() > chance) {
+        if (database.getOptout(event.getAuthor().getIdLong(), "react")) return;
+
+
+        int channelChance = database.getChannelChances(event.getChannel().getIdLong());
+        int effectiveChance = (channelChance >= 0) ? channelChance : guildChance;
+
+        if (ThreadLocalRandom.current().nextInt(100) >= effectiveChance) {
             return;
         }
 
-        // uses only cat emojis in cat channels
+        // uses only cat emojis in cat channels (meow)
         if (isCatChannel(event.getChannel().getName())) {
-            List<RichCustomEmoji> emojis = event.getGuild().getEmojis();
-            // filter only cat emojis
-            MakeReaciton.react(event, getCatEmojis(emojis));
+            Reactions.reactWithCats(event, database);
         } else {
-            MakeReaciton.react(event, null);
+            Reactions.react(event, null, database);
         }
     }
 
-    @Override
-    public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        if (!event.isFromGuild()) return;
-        switch (event.getName()) {
-            case "setchance" -> {
-                Slash.setChance(event, reactDB, authorized);
-            }
-            case "chances" -> {
-                Slash.getChance(event, reactDB);
-            }
-        }
+    private void updateGuildSlashCommands(MessageReceivedEvent event) {
+        event.getGuild().updateCommands().addCommands(
+                CommandsList.getCommands().entrySet().stream()
+                        .map(entry -> Commands.slash(entry.getKey(), entry.getValue().description())
+                                .addOptions(entry.getValue().options()))
+                        .toList()
+        ).queue();
     }
-}
+}

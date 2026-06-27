@@ -1,0 +1,75 @@
+-- 1. Create independent tables
+CREATE TABLE GUILDS
+(
+    id        BIGINT PRIMARY KEY,
+    chances   INT,
+    slash_ver VARCHAR(50)
+);
+
+CREATE TABLE USERS
+(
+    id          BIGINT PRIMARY KEY,
+    blacklisted BOOLEAN DEFAULT FALSE
+);
+
+-- 2. Create tables depending on GUILDS
+CREATE TABLE CHANNEL
+(
+    id      BIGINT PRIMARY KEY,
+    chances INT,
+    guild   BIGINT NOT NULL,
+    FOREIGN KEY (guild) REFERENCES GUILDS (id) ON DELETE CASCADE
+);
+
+CREATE TABLE EMOJI
+(
+    id          BIGINT PRIMARY KEY,
+    times_used  INT     DEFAULT 0,
+    blacklisted BOOLEAN DEFAULT FALSE,
+    guild       BIGINT NOT NULL,
+    FOREIGN KEY (guild) REFERENCES GUILDS (id) ON DELETE CASCADE
+);
+
+-- 3. Create tables depending on USERS
+CREATE TABLE OPTOUTS
+(
+    id    BIGINT PRIMARY KEY,
+    mpreg BOOLEAN DEFAULT FALSE,
+    react BOOLEAN DEFAULT FALSE,
+    quote BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id) REFERENCES USERS (id) ON DELETE CASCADE
+);
+
+-- 4. Create tables depending on CHANNEL
+CREATE TABLE REACTBOARD
+(
+    channel   BIGINT PRIMARY KEY,
+    threshold INT NOT NULL,
+    FOREIGN KEY (channel) REFERENCES CHANNEL (id) ON DELETE CASCADE
+);
+
+CREATE TABLE MESSAGES
+(
+    id      BIGINT PRIMARY KEY,
+    channel BIGINT NOT NULL,
+    FOREIGN KEY (channel) REFERENCES CHANNEL (id) ON DELETE CASCADE
+);
+
+-- 5. Create tables depending on MESSAGES, EMOJI, and USERS
+CREATE TABLE REACTION
+(
+    message BIGINT PRIMARY KEY,
+    count   INT DEFAULT 1,
+    emoji   BIGINT NOT NULL,
+    FOREIGN KEY (message) REFERENCES MESSAGES (id) ON DELETE CASCADE,
+    FOREIGN KEY (emoji) REFERENCES EMOJI (id) ON DELETE CASCADE
+);
+
+CREATE TABLE QUOTE_TAMPER
+(
+    signature SERIAL PRIMARY KEY,
+    user_id   BIGINT NOT NULL,
+    message   BIGINT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES USERS (id) ON DELETE CASCADE,
+    FOREIGN KEY (message) REFERENCES MESSAGES (id) ON DELETE CASCADE
+);

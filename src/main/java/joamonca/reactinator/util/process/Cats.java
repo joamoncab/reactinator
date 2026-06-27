@@ -1,11 +1,11 @@
-package joamonca.reactinator.util;
+package joamonca.reactinator.util.process;
 
 import net.dv8tion.jda.api.entities.emoji.RichCustomEmoji;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Cats {
+    // do we even need a whole class for cats
     public static boolean isCatChannel(String channelName) {
         return
                 channelName.toLowerCase().contains("-cat") ||

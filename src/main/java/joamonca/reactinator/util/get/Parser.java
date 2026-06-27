@@ -1,18 +1,17 @@
-package joamonca.reactinator.util;
+package joamonca.reactinator.util.get;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Parser {
-    private Document doc;
+    private final Document doc;
     public Parser(String url) throws IOException {
-        doc = Jsoup.connect(url).get();
+        doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0) Gecko/20100101 Firefox/146.0").get();
     }
 
     public String getMediaUrl() {

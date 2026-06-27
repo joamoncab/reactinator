@@ -1,7 +1,9 @@
 package joamonca.reactinator;
 
-import joamonca.reactinator.database.ReactDB;
+import joamonca.reactinator.util.get.Database;
 import joamonca.reactinator.events.MessageHandler;
+import joamonca.reactinator.events.ReactionHandler;
+import joamonca.reactinator.events.SlashCommandsHandler;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -19,43 +21,38 @@ public class Main
         String authorizedUser = System.getenv("AUTHORIZED_USER");
         String dbUri = System.getenv("DB_URI");
         String soundsSource = System.getenv("FETCH_URL");
+        String slashVer = System.getenv("SLASH_COMMANDS_VERSION");
 
         EnumSet<GatewayIntent> intents = EnumSet.of(
-                // Enables MessageReceivedEvent for guild (also known as servers)
                 GatewayIntent.GUILD_MESSAGES,
-                // Allows access to server emojis and stickers
                 GatewayIntent.GUILD_EXPRESSIONS,
-                GatewayIntent.MESSAGE_CONTENT // behold the silly
+                GatewayIntent.MESSAGE_CONTENT,
+                GatewayIntent.GUILD_MESSAGE_REACTIONS
         );
 
         try
         {
-            ReactDB reactDB = new ReactDB(dbUri);
+            Database database = new Database(dbUri);
 
-            // Ensure the database connection is closed on shutdown
-            Runtime.getRuntime().addShutdownHook(new Thread(reactDB::close));
+            Runtime.getRuntime().addShutdownHook(new Thread(database::close));
 
-            // By using createLight(token, intents), we use a minimalistic cache profile (lower ram usage)
-            // and only enable the provided set of intents. All other intents are disabled, so you won't receive events for those.
             JDA jda = JDABuilder.createLight(token, intents)
                     .enableCache(CacheFlag.EMOJI)
-                    // On this builder, you are adding all your event listeners and session configuration
-                    .addEventListeners(new MessageHandler(reactDB, authorizedUser, soundsSource))
+                    .addEventListeners(new MessageHandler(database, soundsSource, slashVer))
+                    .addEventListeners(new SlashCommandsHandler(database, authorizedUser, soundsSource))
+                    .addEventListeners(new ReactionHandler(database))
                     .setActivity(Activity.customStatus("behold the reactinator!!!"))
                     .setStatus(OnlineStatus.IDLE)
                     .build();
 
             jda.getRestPing().queue(ping ->
-                    // shows ping in milliseconds
                     System.out.println("Logged in with ping: " + ping)
             );
 
-            // If you want to access the cache, you can use awaitReady() to block the main thread until the jda instance is fully loaded
             jda.awaitReady();
         }
         catch (Exception e)
         {
-            // Thrown if the awaitReady() call is interrupted
             e.printStackTrace();
         }
     }
