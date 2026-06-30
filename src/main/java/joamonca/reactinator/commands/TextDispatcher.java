@@ -2,7 +2,6 @@ package joamonca.reactinator.commands;
 
 import joamonca.reactinator.util.get.Database;
 import joamonca.reactinator.util.send.Reactions;
-import joamonca.reactinator.util.get.Parser;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
@@ -63,7 +62,7 @@ public class TextDispatcher {
         } else if (message.contains("bwaa")) {
             sendMediaFromAsset(event, "bwaa.mp4", null);
         } else {
-            sendMediaFromUrl(event, soundSource + new Parser(soundSource + "/en/search/?name=" + URLEncoder.encode(stripped, StandardCharsets.UTF_8)).getMediaUrl(), null);
+            sendMediaFromUrl(event, soundSource + URLEncoder.encode(stripped, StandardCharsets.UTF_8), null);
         }
     }
 }

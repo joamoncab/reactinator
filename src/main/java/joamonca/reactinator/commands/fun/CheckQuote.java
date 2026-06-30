@@ -6,19 +6,19 @@ import joamonca.reactinator.util.get.QuoteTamperInfo;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
-import static joamonca.reactinator.util.send.Messages.replySlash;
 
 public class CheckQuote implements BotCommand {
     @Override
     public void execute(CommandDataObject data) {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
-        event.deferReply().queue();
         OptionMapping signatureOpt = event.getOption("signature");
 
         if (signatureOpt == null) {
-            replySlash(event, "please specify a signature ID.", true);
+            event.reply("please specify a signature ID.").setEphemeral(true).queue();
             return;
         }
+
+        event.deferReply().queue();
 
         long signature = signatureOpt.getAsLong();
 

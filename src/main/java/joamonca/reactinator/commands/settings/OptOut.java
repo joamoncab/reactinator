@@ -4,7 +4,7 @@ import joamonca.reactinator.commands._meta.BotCommand;
 import joamonca.reactinator.commands._meta.data.CommandDataObject;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
-import static joamonca.reactinator.util.send.Messages.replySlash;
+import static joamonca.reactinator.util.send.Messages.reply;
 
 public class OptOut implements BotCommand {
     @Override
@@ -16,6 +16,6 @@ public class OptOut implements BotCommand {
 
         boolean current = data.database().getOptout(userId, type);
         data.database().setOptout(userId, type, !current);
-        replySlash(event, (current ? "re-enabled " : "opted out of ") + type + ".", true);
+        reply(event, (current ? "re-enabled " : "opted out of ") + type + ".", true);
     }
 }

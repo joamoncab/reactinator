@@ -4,7 +4,7 @@ import joamonca.reactinator.commands._meta.data.CommandDataObject;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 
-import static joamonca.reactinator.util.send.Messages.replySlash;
+import static joamonca.reactinator.util.send.Messages.reply;
 
 public class RefreshCommands implements BotCommand {
     @Override
@@ -13,7 +13,7 @@ public class RefreshCommands implements BotCommand {
         event.deferReply(true).queue();
 
         if (!event.getUser().getId().equals(data.ownerID())) {
-            replySlash(event, "you are not authorized to use this command.", true);
+            reply(event, "you are not authorized to use this command.", true);
             return;
         }
 
@@ -24,11 +24,11 @@ public class RefreshCommands implements BotCommand {
                                     .addOptions(entry.getValue().options()))
                             .toList()
             ).queue(
-                success -> replySlash(event, "slash commands successfully refreshed!", true),
-                failure -> replySlash(event, "failed to refresh slash commands: " + failure.getMessage(), true)
+                success -> reply(event, "slash commands successfully refreshed!", true),
+                failure -> reply(event, "failed to refresh slash commands: " + failure.getMessage(), true)
             );
         } catch (Exception e) {
-            replySlash(event, "an error occurred: " + e.getMessage(), true);
+            reply(event, "an error occurred: " + e.getMessage(), true);
         }
     }
 }

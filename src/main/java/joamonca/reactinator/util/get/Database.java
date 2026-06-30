@@ -41,6 +41,7 @@ public class Database implements AutoCloseable {
     private final PreparedStatement setEmojiBlacklistedStmt;
     private final PreparedStatement incrementEmojiUsageStmt;
     private final PreparedStatement getEmojiLeaderboardStmt;
+    private final PreparedStatement getBlacklistedEmojiIdsStmt;
 
     // Message statements
     private final PreparedStatement insertMessageStmt;
@@ -108,6 +109,8 @@ public class Database implements AutoCloseable {
                 "UPDATE EMOJI SET times_used = times_used + 1 WHERE id = ?");
         getEmojiLeaderboardStmt = connection.prepareStatement(
                 "SELECT id, times_used FROM EMOJI WHERE guild = ? AND blacklisted = FALSE ORDER BY times_used DESC LIMIT ?");
+        getBlacklistedEmojiIdsStmt = connection.prepareStatement(
+                "SELECT id FROM EMOJI WHERE guild = ? AND blacklisted = TRUE");
 
         // Message
         insertMessageStmt = connection.prepareStatement(
@@ -344,6 +347,21 @@ public class Database implements AutoCloseable {
         return false; // not found = not blacklisted
     }
 
+    public Set<Long> getBlacklistedEmojiIds(long guildId) {
+        Set<Long> ids = new java.util.HashSet<>();
+        try {
+            getBlacklistedEmojiIdsStmt.setLong(1, guildId);
+            try (ResultSet rs = getBlacklistedEmojiIdsStmt.executeQuery()) {
+                while (rs.next()) {
+                    ids.add(rs.getLong("id"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ids;
+    }
+
     public boolean setEmojiBlacklisted(long emojiId, boolean blacklisted) {
         try {
             setEmojiBlacklistedStmt.setBoolean(1, blacklisted);
@@ -523,7 +541,7 @@ public class Database implements AutoCloseable {
                     ensureUserStmt, isBlacklistedStmt, setBlacklistedStmt,
                     ensureOptoutsStmt,
                     ensureEmojiStmt, isEmojiBlacklistedStmt, setEmojiBlacklistedStmt,
-                    incrementEmojiUsageStmt, getEmojiLeaderboardStmt,
+                    incrementEmojiUsageStmt, getEmojiLeaderboardStmt, getBlacklistedEmojiIdsStmt,
                     insertMessageStmt,
                     upsertReactionStmt, getReactionCountStmt, getReactLeaderboardStmt, getReactionEmojiStmt,
                     setReactboardStmt, getReactboardForGuildStmt, removeReactboardStmt,

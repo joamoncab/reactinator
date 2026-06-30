@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 import static joamonca.reactinator.util.process.Image.createCircularCrop;
 import static joamonca.reactinator.util.process.Image.encodeImage;
-import static joamonca.reactinator.util.send.Messages.replySlash;
+import static joamonca.reactinator.util.send.Messages.reply;
 
 public class Mpreg implements BotCommand {
     private static final int AVATAR_X = 253;
@@ -42,7 +42,7 @@ public class Mpreg implements BotCommand {
 
         try (InputStream templateStream = Mpreg.class.getResourceAsStream(TEMPLATE_PATH)) {
             if (templateStream == null) {
-                replySlash(event, "hey so i lost the mpreg", false); // honestly too funny to not be seen
+                reply(event, "hey so i lost the mpreg", false); // honestly too funny to not be seen
                 return;
             }
 
@@ -57,7 +57,7 @@ public class Mpreg implements BotCommand {
 
         } catch (Exception e) {
             Logger.getLogger(Mpreg.class.getName()).log(Level.SEVERE, "Failed to process mpreg image", e);
-            replySlash(event, "uh oh something went wrong", false);
+            reply(event, "uh oh something went wrong", false);
         }
     }
 

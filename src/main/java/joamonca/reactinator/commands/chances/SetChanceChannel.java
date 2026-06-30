@@ -6,7 +6,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
-import static joamonca.reactinator.util.send.Messages.replySlash;
+import static joamonca.reactinator.util.send.Messages.reply;
 
 public class SetChanceChannel implements BotCommand {
     @Override
@@ -14,7 +14,7 @@ public class SetChanceChannel implements BotCommand {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
         event.deferReply(true).queue();
         if (!(event.getUser().getId().equals(data.ownerID()) || event.getMember().hasPermission(Permission.MESSAGE_MANAGE))) {
-            replySlash(event, "you are not authorized to use this command.", true);
+            reply(event, "you are not authorized to use this command.", true);
             return;
         }
 
@@ -25,15 +25,15 @@ public class SetChanceChannel implements BotCommand {
         long guildId = event.getGuild().getIdLong();
 
         if (chance < 0 || chance > 100) {
-            replySlash(event, "chance must be between 0 and 100.", true);
+            reply(event, "chance must be between 0 and 100.", true);
             return;
         }
 
         data.database().ensureChannel(channelId, guildId);
         if (data.database().setChannelChances(channelId, chance)) {
-            replySlash(event, "channel chances for " + channelMention + " updated to " + chance + "%", true);
+            reply(event, "channel chances for " + channelMention + " updated to " + chance + "%", true);
         } else {
-            replySlash(event, "failed to update channel chances.", true);
+            reply(event, "failed to update channel chances.", true);
         }
     }
 }

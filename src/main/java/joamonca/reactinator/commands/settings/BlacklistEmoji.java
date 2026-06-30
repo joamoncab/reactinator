@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static joamonca.reactinator.util.send.Messages.replySlash;
+import static joamonca.reactinator.util.send.Messages.reply;
 
 public class BlacklistEmoji implements BotCommand {
     private static final Pattern EMOJI_PATTERN = Pattern.compile("<a?:\\w+:(\\d+)>");
@@ -18,14 +18,14 @@ public class BlacklistEmoji implements BotCommand {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
         event.deferReply(true).queue();
         if (!(event.getUser().getId().equals(data.ownerID()) || event.getMember().hasPermission(Permission.MESSAGE_MANAGE))) {
-            replySlash(event, "you are not authorized to use this command.", true);
+            reply(event, "you are not authorized to use this command.", true);
             return;
         }
 
         String emojiStr = event.getOption("emoji").getAsString();
         Matcher matcher = EMOJI_PATTERN.matcher(emojiStr);
         if (!matcher.find()) {
-            replySlash(event, "invalid emoji format. use a custom server emoji.", true);
+            reply(event, "invalid emoji format. use a custom server emoji.", true);
             return;
         }
 
@@ -35,6 +35,6 @@ public class BlacklistEmoji implements BotCommand {
         data.database().ensureEmoji(emojiId, guildId);
         boolean current = data.database().isEmojiBlacklisted(emojiId);
         data.database().setEmojiBlacklisted(emojiId, !current);
-        replySlash(event, (current ? "un" : "") + "blacklisted emoji.", true);
+        reply(event, (current ? "un" : "") + "blacklisted emoji.", true);
     }
 }

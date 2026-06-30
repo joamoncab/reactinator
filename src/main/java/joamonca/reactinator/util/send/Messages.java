@@ -10,14 +10,26 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 public class Messages {
     public static void reply(MessageReceivedEvent event, String message) {
         event.getChannel().sendMessage(message).setMessageReference(event.getMessageId()).queue();
     }
 
-    public static void replySlash(SlashCommandInteractionEvent event, String message, boolean ephemeral) {
+    public static void reply(SlashCommandInteractionEvent event, String message, boolean ephemeral) {
         event.getHook().sendMessage(message).setEphemeral(ephemeral).queue();
+    }
+
+    public static void replyError(Event event, String message) {
+        message = message + "\n<@807170846497570848> do better!!!"; //blaming mud for this btw
+        if (event instanceof MessageReceivedEvent messageReceivedEvent) {
+            reply(messageReceivedEvent, message);
+        } else if (event instanceof SlashCommandInteractionEvent slashCommandInteractionEvent) {
+            reply(slashCommandInteractionEvent, message, true);
+        }
     }
 
     public static void sendMediaFromAsset(Event event, @NotNull String fileName, @Nullable String message) {
@@ -46,11 +58,19 @@ public class Messages {
             java.net.URL url = new java.net.URI(urlString).toURL();
             String fileName = urlString.substring(urlString.lastIndexOf('/') + 1);
             if (!fileName.contains(".mp3")) {
-                fileName = "audio.mp3";
+                fileName = URLDecoder.decode(fileName, StandardCharsets.UTF_8) + ".mp3";
             }
 
-            try (InputStream inputStream = url.openStream()) {
-                sendMedia(event, inputStream, message, fileName);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            if (connection.getResponseCode() == java.net.HttpURLConnection.HTTP_OK) {
+                try (InputStream inputStream = connection.getInputStream()) {
+                    sendMedia(event, inputStream, message, fileName);
+                }
+            } else {
+                System.out.println("Error: " + connection.getResponseMessage());
+                replyError(event, "couldn't find that weird media you wanted");
             }
 
         } catch (Exception e) {
@@ -64,7 +84,7 @@ public class Messages {
             slashCommandInteractionEvent.getHook().sendMessage(message)
                     .addFiles(FileUpload.fromData(data, fileName))
                     .queue();
-        } else if (event instanceof  MessageReceivedEvent messageReceivedEvent) {
+        } else if (event instanceof MessageReceivedEvent messageReceivedEvent) {
             messageReceivedEvent.getChannel().sendMessage(message)
                     .addFiles(FileUpload.fromData(data, fileName))
                     .setMessageReference(messageReceivedEvent.getMessage().getReferencedMessage())

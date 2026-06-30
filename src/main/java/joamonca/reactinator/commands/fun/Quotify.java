@@ -19,7 +19,7 @@ import java.util.List;
 
 import static joamonca.reactinator.util.process.Image.createCircularCrop;
 import static joamonca.reactinator.util.process.Image.encodeImage;
-import static joamonca.reactinator.util.send.Messages.replySlash;
+import static joamonca.reactinator.util.send.Messages.reply;
 
 public class Quotify implements BotCommand {
     private static final int AVATAR_DOWNLOAD_SIZE = 256;
@@ -27,15 +27,16 @@ public class Quotify implements BotCommand {
     @Override
     public void execute(CommandDataObject data) {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
-        event.deferReply().queue();
 
         String messageInput = event.getOption("message").getAsString();
         TargetMessageRef ref = parseMessageInput(event, messageInput);
 
         if (ref == null) {
-            replySlash(event, "invalid message ID or link format. what did you put in there?", true);
+            event.reply("invalid message ID or link format. what did you put in there?").setEphemeral(true).queue();
             return;
         }
+
+        event.deferReply().queue();
 
         MessageChannel channel = event.getGuild().getChannelById(GuildMessageChannel.class, ref.channelId);
         if (channel == null) {
@@ -46,7 +47,7 @@ public class Quotify implements BotCommand {
                 message -> {
                     // Respect quote opt-out
                     if (data.database().getOptout(message.getAuthor().getIdLong(), "quote")) {
-                        replySlash(event, "that user has opted out of being quoted.", true);
+                        reply(event, "that user has opted out of being quoted.", false);
                         return;
                     }
                     try {
@@ -57,15 +58,15 @@ public class Quotify implements BotCommand {
                                 message.getGuild().getIdLong()
                         );
                         if (signature == -1) {
-                            replySlash(event, "failed to generate a signature for this quote (SIG# watermark)", true);
+                            reply(event, "failed to generate a signature for this quote (SIG# watermark)", false);
                             return;
                         }
                         generateQuoteImage(event, message, signature);
                     } catch (Exception e) {
-                        replySlash(event, "failed to process the quote card image, blaming you for this btw", true);
+                        reply(event, "failed to process the quote card image, blaming you for this btw", false);
                     }
                 },
-                failure -> replySlash(event, "could not find or retrieve the specified message. trying to hack someone or seomthing?", true)
+                failure -> reply(event, "could not find or retrieve the specified message. trying to hack someone or something?", false)
         );
     }
 
