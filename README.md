@@ -28,7 +28,7 @@ And finally, you can reply to someone mentioning @reactinator and querying a sou
 AUTHORIZED_USER=your-discord-id
 DB_URI=jdbc:mysql://mariadb-user:mariadb-password@mariadb-host:mariadb-port/database-name
 FETCH_URL=url-for-sound-effects
-SLASH_COMMANDS_VERSION=3 
+SLASH_COMMANDS_VERSION=4 
 TOKEN=discord-token
 ```
 > NOTE: SLASH_COMMANDS_VERSION is bumped with every slash commands update
