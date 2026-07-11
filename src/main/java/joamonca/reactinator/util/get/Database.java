@@ -61,6 +61,13 @@ public class Database implements AutoCloseable {
     private final PreparedStatement insertQuoteTamperStmt;
     private final PreparedStatement getQuoteTamperStmt;
 
+    // User reaction tracking statements
+    private final PreparedStatement incrementUserReactionStmt;
+    private final PreparedStatement upsertUserEmojiStatStmt;
+    private final PreparedStatement getUserReactionLeaderboardStmt;
+    private final PreparedStatement getUserReactionTotalStmt;
+    private final PreparedStatement getUserEmojiStatsStmt;
+
     public Database(String uri) throws SQLException {
         connection = DriverManager.getConnection(uri);
 
@@ -151,6 +158,20 @@ public class Database implements AutoCloseable {
                 "JOIN MESSAGES m ON qt.message = m.id " +
                 "JOIN CHANNEL c ON m.channel = c.id " +
                 "WHERE qt.signature = ?");
+
+        // User reaction tracking
+        incrementUserReactionStmt = connection.prepareStatement(
+                "INSERT INTO USER_REACTIONS (user_id, guild_id, total) VALUES (?, ?, 1) " +
+                "ON DUPLICATE KEY UPDATE total = total + 1");
+        upsertUserEmojiStatStmt = connection.prepareStatement(
+                "INSERT INTO USER_EMOJI_STATS (user_id, guild_id, emoji_id) VALUES (?, ?, ?) " +
+                "ON DUPLICATE KEY UPDATE count = count + 1");
+        getUserReactionLeaderboardStmt = connection.prepareStatement(
+                "SELECT user_id, total FROM USER_REACTIONS WHERE guild_id = ? ORDER BY total DESC LIMIT ?");
+        getUserReactionTotalStmt = connection.prepareStatement(
+                "SELECT total FROM USER_REACTIONS WHERE user_id = ? AND guild_id = ?");
+        getUserEmojiStatsStmt = connection.prepareStatement(
+                "SELECT emoji_id, count FROM USER_EMOJI_STATS WHERE user_id = ? AND guild_id = ? ORDER BY count DESC LIMIT ?");
     }
 
     public void ensureGuild(long guildId) {
@@ -532,6 +553,67 @@ public class Database implements AutoCloseable {
         return null;
     }
 
+    public void incrementUserReaction(long userId, long guildId, long emojiId) {
+        try {
+            incrementUserReactionStmt.setLong(1, userId);
+            incrementUserReactionStmt.setLong(2, guildId);
+            incrementUserReactionStmt.executeUpdate();
+
+            upsertUserEmojiStatStmt.setLong(1, userId);
+            upsertUserEmojiStatStmt.setLong(2, guildId);
+            upsertUserEmojiStatStmt.setLong(3, emojiId);
+            upsertUserEmojiStatStmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<long[]> getUserReactionLeaderboard(long guildId, int limit) {
+        List<long[]> results = new ArrayList<>();
+        try {
+            getUserReactionLeaderboardStmt.setLong(1, guildId);
+            getUserReactionLeaderboardStmt.setInt(2, limit);
+            try (ResultSet rs = getUserReactionLeaderboardStmt.executeQuery()) {
+                while (rs.next()) {
+                    results.add(new long[]{ rs.getLong("user_id"), rs.getLong("total") });
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return results;
+    }
+
+    public int getUserReactionTotal(long userId, long guildId) {
+        try {
+            getUserReactionTotalStmt.setLong(1, userId);
+            getUserReactionTotalStmt.setLong(2, guildId);
+            try (ResultSet rs = getUserReactionTotalStmt.executeQuery()) {
+                if (rs.next()) return rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<long[]> getUserEmojiStats(long userId, long guildId, int limit) {
+        List<long[]> results = new ArrayList<>();
+        try {
+            getUserEmojiStatsStmt.setLong(1, userId);
+            getUserEmojiStatsStmt.setLong(2, guildId);
+            getUserEmojiStatsStmt.setInt(3, limit);
+            try (ResultSet rs = getUserEmojiStatsStmt.executeQuery()) {
+                while (rs.next()) {
+                    results.add(new long[]{ rs.getLong("emoji_id"), rs.getLong("count") });
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return results;
+    }
+
     @Override
     public void close() {
         try {
@@ -545,7 +627,9 @@ public class Database implements AutoCloseable {
                     insertMessageStmt,
                     upsertReactionStmt, getReactionCountStmt, getReactLeaderboardStmt, getReactionEmojiStmt,
                     setReactboardStmt, getReactboardForGuildStmt, removeReactboardStmt,
-                    insertQuoteTamperStmt, getQuoteTamperStmt
+                    insertQuoteTamperStmt, getQuoteTamperStmt,
+                    incrementUserReactionStmt, upsertUserEmojiStatStmt,
+                    getUserReactionLeaderboardStmt, getUserReactionTotalStmt, getUserEmojiStatsStmt
             };
             for (PreparedStatement stmt : stmts) {
                 if (stmt != null) stmt.close();

@@ -1,5 +1,6 @@
 package joamonca.reactinator.commands;
 
+import joamonca.reactinator.util.exceptions.SoundNotFoundException;
 import joamonca.reactinator.util.get.Database;
 import joamonca.reactinator.util.send.Reactions;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -39,20 +40,20 @@ public class TextDispatcher {
             reply(event, "shut up before i steal all your ram");
         } else if (message.contains("ban")) {
             reply(event, "banned");
-            Reactions.react(event, null, database);
+            Reactions.react(event, null, database, false);
         } else if (message.contains("cat") || message.contains("meow")) {
             reply(event, "meow");
-            Reactions.react(event, getCatEmojis(event.getGuild().getEmojis()), database);
+            Reactions.react(event, getCatEmojis(event.getGuild().getEmojis()), database, false);
         } else if (message.contains("die")) {
             reply(event, "i always come back");
         } else if (message.contains("bwa")) {
             sendMediaFromAsset(event, "bwaa.mp4", null);
         } else {
-            Reactions.react(event, null, database);
+            Reactions.react(event, null, database, false);
         }
     }
 
-    public static void useSilly(MessageReceivedEvent event, String soundSource) throws IOException {
+    public static void useSilly(MessageReceivedEvent event, String soundSource, Database database) throws IOException {
         String stripped = stripMentions(event.getMessage().getContentRaw());
         String message = stripped.toLowerCase();
         if (message.contains("buzzer") || message.contains("wrong")) {
@@ -62,7 +63,11 @@ public class TextDispatcher {
         } else if (message.contains("bwaa")) {
             sendMediaFromAsset(event, "bwaa.mp4", null);
         } else {
-            sendMediaFromUrl(event, soundSource + URLEncoder.encode(stripped, StandardCharsets.UTF_8), null);
+            try {
+                sendMediaFromUrl(event, soundSource + URLEncoder.encode(stripped, StandardCharsets.UTF_8), null);
+            } catch (SoundNotFoundException e) {
+                use(event, database);
+            }
         }
     }
 }

@@ -9,6 +9,8 @@ import joamonca.reactinator.commands.fun.Mpreg;
 import joamonca.reactinator.commands.fun.Quotify;
 import joamonca.reactinator.commands.fun.ReactLeaderboard;
 import joamonca.reactinator.commands.fun.Soundboard;
+import joamonca.reactinator.commands.fun.UserLeaderboard;
+import joamonca.reactinator.commands.fun.UserStats;
 import joamonca.reactinator.commands.settings.Blacklist;
 import joamonca.reactinator.commands.settings.BlacklistEmoji;
 import joamonca.reactinator.commands.settings.OptOut;
@@ -112,6 +114,17 @@ public class CommandsList {
                 "refresh commands",
                 "refresh the slash commands for this guild (bot staff only)",
                 new RefreshCommands()
+        ));
+        commands.put("userleaderboard", new CommandObject(
+                "user leaderboard",
+                "show the most reacted users in this server",
+                new UserLeaderboard()
+        ));
+        commands.put("userstats", new CommandObject(
+                "user stats",
+                "view reaction stats for a user",
+                new UserStats(),
+                new OptionData(OptionType.USER, "user", "the user to check stats for", false)
         ));
     }
 

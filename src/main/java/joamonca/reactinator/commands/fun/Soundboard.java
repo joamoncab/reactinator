@@ -2,6 +2,7 @@ package joamonca.reactinator.commands.fun;
 
 import joamonca.reactinator.commands._meta.BotCommand;
 import joamonca.reactinator.commands._meta.data.CommandDataObject;
+import joamonca.reactinator.util.exceptions.SoundNotFoundException;
 import joamonca.reactinator.util.send.Messages;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 
 import static joamonca.reactinator.util.process.Text.stripMentions;
 import static joamonca.reactinator.util.send.Messages.reply;
+import static joamonca.reactinator.util.send.Messages.replyError;
 
 public class Soundboard implements BotCommand {
     @Override
@@ -36,7 +38,11 @@ public class Soundboard implements BotCommand {
             } else if (message.contains("bwaa")) {
                 Messages.sendMediaFromAsset(event, "bwaa.mp4", null);
             } else {
-                Messages.sendMediaFromUrl(event, soundSource + URLEncoder.encode(stripped, StandardCharsets.UTF_8), null);
+                try {
+                    Messages.sendMediaFromUrl(event, soundSource + URLEncoder.encode(stripped, StandardCharsets.UTF_8), null);
+                } catch (SoundNotFoundException e) {
+                    replyError(event, e.getMessage());
+                }
             }
         } catch (Exception e) {
             System.out.println("Error playing soundboard command: " + e.getMessage());

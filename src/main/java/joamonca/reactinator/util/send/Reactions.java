@@ -13,10 +13,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static joamonca.reactinator.util.send.Messages.reply;
-
 public class Reactions {
-    public static void react(MessageReceivedEvent event, List<RichCustomEmoji> customEmojiList, Database database) {
+    public static void react(MessageReceivedEvent event, List<RichCustomEmoji> customEmojiList, Database database, boolean byLuck) {
         if (customEmojiList == null) customEmojiList = event.getGuild().getEmojis();
         if (customEmojiList.isEmpty()) return;
 
@@ -30,10 +28,10 @@ public class Reactions {
             if (available.isEmpty()) return;
         }
 
-        tryReact(event, available, database);
+        tryReact(event, available, database, byLuck);
     }
 
-    private static void tryReact(MessageReceivedEvent event, List<RichCustomEmoji> available, Database database) {
+    private static void tryReact(MessageReceivedEvent event, List<RichCustomEmoji> available, Database database, boolean byLuck) {
         if (available.isEmpty()) return;
 
         RichCustomEmoji emojiToUse = available.get(ThreadLocalRandom.current().nextInt(available.size()));
@@ -52,6 +50,13 @@ public class Reactions {
                         database.incrementEmojiUsage(emojiId);
                         database.insertMessage(messageId, channelId);
                         database.upsertReaction(messageId, emojiId);
+
+                        // Only track user stats for reactions triggered by luck (not mentions)
+                        if (byLuck) {
+                            long userId = event.getMessage().getAuthor().getIdLong();
+                            database.ensureUser(userId);
+                            database.incrementUserReaction(userId, guildId, emojiId);
+                        }
 
                         // Check reactboard threshold
                         ReactboardEntry reactboard = database.getReactboardForGuild(guildId);
@@ -78,7 +83,7 @@ public class Reactions {
         );
     }
 
-    public static void reactWithCats(MessageReceivedEvent event, Database database) {
-        react(event, Cats.getCatEmojis(event.getGuild().getEmojis()), database);
+    public static void reactWithCats(MessageReceivedEvent event, Database database, boolean byLuck) {
+        react(event, Cats.getCatEmojis(event.getGuild().getEmojis()), database, byLuck);
     }
 }

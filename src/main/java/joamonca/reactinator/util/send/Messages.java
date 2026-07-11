@@ -1,6 +1,7 @@
 package joamonca.reactinator.util.send;
 
 import joamonca.reactinator.commands.TextDispatcher;
+import joamonca.reactinator.util.exceptions.SoundNotFoundException;
 import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
@@ -49,7 +51,7 @@ public class Messages {
         }
     }
 
-    public static void sendMediaFromUrl(Event event, @NotNull String urlString, @Nullable String message) {
+    public static void sendMediaFromUrl(Event event, @NotNull String urlString, @Nullable String message) throws SoundNotFoundException {
         if (message == null) {
             message = "";
         }
@@ -69,11 +71,10 @@ public class Messages {
                     sendMedia(event, inputStream, message, fileName);
                 }
             } else {
-                System.out.println("Error: " + connection.getResponseMessage());
-                replyError(event, "couldn't find that weird media you wanted");
+                throw new SoundNotFoundException("couldn't find that weird media you wanted");
             }
 
-        } catch (Exception e) {
+        } catch (URISyntaxException | IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }

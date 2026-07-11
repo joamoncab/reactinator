@@ -60,7 +60,7 @@ public class MessageHandler extends ListenerAdapter {
             if (event.getMessage().getAuthor().equals(event.getJDA().getSelfUser())) return; // ignore self but not other bots (very important for the silly)
             if (event.getMessage().getReferencedMessage() != null && !event.getMessage().getReferencedMessage().getAuthor().equals(event.getJDA().getSelfUser())) {
                 try {
-                    TextDispatcher.useSilly(event, soundsSource);
+                    TextDispatcher.useSilly(event, soundsSource, database);
                 } catch (IOException e) {
                     System.out.println(e.getMessage());
                     TextDispatcher.use(event, database);
@@ -82,9 +82,9 @@ public class MessageHandler extends ListenerAdapter {
 
         // uses only cat emojis in cat channels (meow)
         if (isCatChannel(event.getChannel().getName())) {
-            Reactions.reactWithCats(event, database);
+            Reactions.reactWithCats(event, database, true);
         } else {
-            Reactions.react(event, null, database);
+            Reactions.react(event, null, database, true);
         }
     }
 
