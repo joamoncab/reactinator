@@ -9,6 +9,7 @@ public record CommandObject(
         String description,
         BotCommand command,
         boolean HiddenFromHelp,
+        boolean userInstallable, // whether to register as a user-installable app
         List<OptionData> options // for slash commands
 ) {
     public CommandObject {
@@ -17,6 +18,11 @@ public record CommandObject(
 
     // all my homies love varargs
     public CommandObject(String name, String description, BotCommand command, boolean hiddenFromHelp, OptionData... options) {
-        this(name, description, command, hiddenFromHelp, List.of(options));
+        this(name, description, command, hiddenFromHelp, false, List.of(options));
+    }
+
+    // same but for user-installable commands
+    public CommandObject(String name, String description, BotCommand command, boolean hiddenFromHelp, boolean userInstallable, OptionData... options) {
+        this(name, description, command, hiddenFromHelp, userInstallable, List.of(options));
     }
 }

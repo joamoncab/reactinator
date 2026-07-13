@@ -57,6 +57,7 @@ public class CommandsList {
                 "put someone's pfp on discord's mpreg emoji",
                 new Mpreg(),
                 false,
+                true,
                 new OptionData(OptionType.MENTIONABLE, "user", "user mention to mpreg", true)
         ));
         commands.put("quotify", new CommandObject(
@@ -109,6 +110,7 @@ public class CommandsList {
                 "play a soundboard effect",
                 new Soundboard(),
                 false,
+                true,
                 new OptionData(OptionType.STRING, "sound", "the soundboard effect or query to play", true)
         ));
         commands.put("copypasta", new CommandObject(
@@ -116,6 +118,7 @@ public class CommandsList {
                 "send a copypasta",
                 new Copypasta(),
                 false,
+                true,
                 new OptionData(OptionType.STRING, "copypasta", "the copypasta to send", true)
         ));
         commands.put("reactleaderboard", new CommandObject(
