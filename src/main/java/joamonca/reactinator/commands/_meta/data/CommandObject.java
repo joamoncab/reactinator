@@ -8,6 +8,7 @@ public record CommandObject(
         String name,
         String description,
         BotCommand command,
+        boolean HiddenFromHelp,
         List<OptionData> options // for slash commands
 ) {
     public CommandObject {
@@ -15,7 +16,7 @@ public record CommandObject(
     }
 
     // all my homies love varargs
-    public CommandObject(String name, String description, BotCommand command, OptionData... options) {
-        this(name, description, command, List.of(options));
+    public CommandObject(String name, String description, BotCommand command, boolean hiddenFromHelp, OptionData... options) {
+        this(name, description, command, hiddenFromHelp, List.of(options));
     }
 }

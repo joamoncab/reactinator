@@ -27,10 +27,12 @@ And finally, you can reply to someone mentioning @reactinator and querying a sou
 ```
 AUTHORIZED_USER=your-discord-id
 DB_URI=jdbc:mysql://mariadb-user:mariadb-password@mariadb-host:mariadb-port/database-name
-FETCH_URL=url-for-sound-effects
-SLASH_COMMANDS_VERSION=4 
+SOUNDBOARD_URL=url-for-sound-effects
+COPYPASTA_URL=url-for-copypastas
+SLASH_COMMANDS_VERSION=6
 TOKEN=discord-token
 ```
 > NOTE: SLASH_COMMANDS_VERSION is bumped with every slash commands update
+> NOTE: both urls are meant to receive the base endpoint + {query} and reply with the media (mp3 file or plain text) directly
 6. run the jar
 7. enjoy your reactinator!

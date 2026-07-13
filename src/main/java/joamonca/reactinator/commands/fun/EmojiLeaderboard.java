@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import java.util.List;
 
-public class Leaderboard implements BotCommand {
+public class EmojiLeaderboard implements BotCommand {
     @Override
     public void execute(CommandDataObject data) {
         SlashCommandInteractionEvent event = (SlashCommandInteractionEvent) data.event();
@@ -30,6 +30,7 @@ public class Leaderboard implements BotCommand {
             sb.append(rank++).append(". ").append(display)
                     .append(" — used **").append(entry[1]).append("** times\n");
         }
+        sb.append("total: **").append(data.database().getEmojiUsageTotal(event.getGuild().getIdLong())).append("** reactions\n\n");
 
         event.getHook().sendMessage(sb.toString()).queue();
     }

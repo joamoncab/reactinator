@@ -4,9 +4,10 @@ import joamonca.reactinator.commands.chances.GetChance;
 import joamonca.reactinator.commands.chances.SetChance;
 import joamonca.reactinator.commands.chances.SetChanceChannel;
 import joamonca.reactinator.commands.fun.CheckQuote;
-import joamonca.reactinator.commands.fun.Leaderboard;
+import joamonca.reactinator.commands.fun.EmojiLeaderboard;
 import joamonca.reactinator.commands.fun.Mpreg;
 import joamonca.reactinator.commands.fun.Quotify;
+import joamonca.reactinator.commands.fun.Copypasta;
 import joamonca.reactinator.commands.fun.ReactLeaderboard;
 import joamonca.reactinator.commands.fun.Soundboard;
 import joamonca.reactinator.commands.fun.UserLeaderboard;
@@ -33,18 +34,21 @@ public class CommandsList {
                 "get chances",
                 "get the current guild or channel reaction chances",
                 new GetChance(),
+                false,
                 new OptionData(OptionType.CHANNEL, "channel", "channel to get chances for", false)
         ));
         commands.put("setchance", new CommandObject(
                 "set chances",
                 "set the current guild reaction chances",
                 new SetChance(),
+                false,
                 new OptionData(OptionType.INTEGER, "chance", "chance (%) of reacting to a message", true)
         ));
         commands.put("setchancechannel", new CommandObject(
                 "set channel chances",
                 "set per-channel reaction chances (overrides guild default)",
                 new SetChanceChannel(),
+                false,
                 new OptionData(OptionType.INTEGER, "chance", "chance (%) of reacting in this channel", true),
                 new OptionData(OptionType.CHANNEL, "channel", "channel to set chances for (will take actual channel if none provided)", false)
         ));
@@ -52,18 +56,21 @@ public class CommandsList {
                 "mpreginator",
                 "put someone's pfp on discord's mpreg emoji",
                 new Mpreg(),
+                false,
                 new OptionData(OptionType.MENTIONABLE, "user", "user mention to mpreg", true)
         ));
         commands.put("quotify", new CommandObject(
                 "quotify",
                 "creates a quote image from a message",
                 new Quotify(),
+                false,
                 new OptionData(OptionType.STRING, "message", "the message ID or link to quote", true)
         ));
         commands.put("optout", new CommandObject(
                 "opt out",
                 "toggle opt-out for bot features",
                 new OptOut(),
+                false,
                 new OptionData(OptionType.STRING, "type", "what to opt out of", true)
                         .addChoice("mpreg", "mpreg")
                         .addChoice("react", "react")
@@ -73,12 +80,14 @@ public class CommandsList {
                 "blacklist emoji",
                 "toggle blacklist on a custom emoji",
                 new BlacklistEmoji(),
+                false,
                 new OptionData(OptionType.STRING, "emoji", "the custom emoji to blacklist", true)
         ));
         commands.put("reactboard", new CommandObject(
                 "reactboard",
                 "configure the reactboard channel and threshold",
                 new SetReactboard(),
+                false,
                 new OptionData(OptionType.CHANNEL, "channel", "channel to post reactboard messages in", true),
                 new OptionData(OptionType.INTEGER, "threshold", "reaction count threshold (0 to disable reactboard)", true)
         ));
@@ -86,45 +95,66 @@ public class CommandsList {
                 "blacklist user",
                 "toggle blacklist on a user (bot staff only)",
                 new Blacklist(),
+                true,
                 new OptionData(OptionType.USER, "user", "user to blacklist", true)
         ));
-        commands.put("leaderboard", new CommandObject(
+        commands.put("emojileaderboard", new CommandObject(
                 "leaderboard",
                 "show the top emojis by usage in this server",
-                new Leaderboard()
+                new EmojiLeaderboard(),
+                false
         ));
         commands.put("soundboard", new CommandObject(
                 "soundboard",
                 "play a soundboard effect",
                 new Soundboard(),
+                false,
                 new OptionData(OptionType.STRING, "sound", "the soundboard effect or query to play", true)
+        ));
+        commands.put("copypasta", new CommandObject(
+                "copypasta",
+                "send a copypasta",
+                new Copypasta(),
+                false,
+                new OptionData(OptionType.STRING, "copypasta", "the copypasta to send", true)
         ));
         commands.put("reactleaderboard", new CommandObject(
                 "reactleaderboard",
                 "show the top reacted messages in this server",
-                new ReactLeaderboard()
+                new ReactLeaderboard(),
+                false
         ));
         commands.put("checkquote", new CommandObject(
                 "check quote signature",
                 "checks a quote signature to verify its authenticity",
                 new CheckQuote(),
+                false,
                 new OptionData(OptionType.INTEGER, "signature", "the signature number from the bottom right of the image", true)
         ));
         commands.put("refreshcommands", new CommandObject(
                 "refresh commands",
                 "refresh the slash commands for this guild (bot staff only)",
-                new RefreshCommands()
+                new RefreshCommands(),
+                true
         ));
         commands.put("userleaderboard", new CommandObject(
                 "user leaderboard",
                 "show the most reacted users in this server",
-                new UserLeaderboard()
+                new UserLeaderboard(),
+                false
         ));
         commands.put("userstats", new CommandObject(
                 "user stats",
                 "view reaction stats for a user",
                 new UserStats(),
+                false,
                 new OptionData(OptionType.USER, "user", "the user to check stats for", false)
+        ));
+        commands.put("help", new CommandObject(
+                "help",
+                "show a list of all available commands",
+                new Help(),
+                true
         ));
     }
 

@@ -1,6 +1,7 @@
 package joamonca.reactinator.util.send;
 
 import joamonca.reactinator.commands.TextDispatcher;
+import joamonca.reactinator.util.exceptions.CopypastaNotFoundException;
 import joamonca.reactinator.util.exceptions.SoundNotFoundException;
 import net.dv8tion.jda.api.events.Event;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -74,6 +75,32 @@ public class Messages {
                 throw new SoundNotFoundException("couldn't find that weird media you wanted");
             }
 
+        } catch (URISyntaxException | IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public static void sendCopypastaFromUrl(Event event, @NotNull String urlString) throws CopypastaNotFoundException {
+        try {
+            java.net.URL url = new java.net.URI(urlString).toURL();
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            if (connection.getResponseCode() == java.net.HttpURLConnection.HTTP_OK) {
+                try (InputStream inputStream = connection.getInputStream()) {
+                    String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+                    if (content.length() > 2000) {
+                        content = content.substring(0, 1997) + "...";
+                    }
+                    if (event instanceof SlashCommandInteractionEvent slashEvent) {
+                        reply(slashEvent, content, false);
+                    } else if (event instanceof MessageReceivedEvent msgEvent) {
+                        reply(msgEvent, content);
+                    }
+                }
+            } else {
+                throw new CopypastaNotFoundException("couldn't find that weird copypasta you wanted");
+            }
         } catch (URISyntaxException | IOException e) {
             System.out.println("Error: " + e.getMessage());
         }

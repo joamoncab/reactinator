@@ -7,12 +7,12 @@ import joamonca.reactinator.util.get.Database;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class SlashDispatcher {
-    public SlashDispatcher(SlashCommandInteractionEvent event, Database database, String ownerID, String soundsSource) {
+    public SlashDispatcher(SlashCommandInteractionEvent event, Database database, String ownerID, String soundsSource, String copypastaSource) {
         CommandObject command = CommandsList.getCommand(event.getName());
         if (command == null) {
             event.getInteraction().reply("how did you do this?").setEphemeral(true).queue();
         } else {
-            command.command().execute(new CommandDataObject(event, database, ownerID, soundsSource));
+            command.command().execute(new CommandDataObject(event, database, ownerID, soundsSource, copypastaSource));
         }
     }
 }

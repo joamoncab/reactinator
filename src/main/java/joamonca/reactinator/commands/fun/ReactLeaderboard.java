@@ -35,6 +35,8 @@ public class ReactLeaderboard implements BotCommand {
                     .append(jumpUrl).append("\n");
         }
 
+        sb.append("total: **").append(data.database().getReactionGrandTotal(event.getGuild().getIdLong())).append("** overall reactions\n\n");
+
         event.getHook().sendMessage(sb.toString()).queue();
     }
 }

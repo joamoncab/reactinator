@@ -42,6 +42,7 @@ public class Database implements AutoCloseable {
     private final PreparedStatement incrementEmojiUsageStmt;
     private final PreparedStatement getEmojiLeaderboardStmt;
     private final PreparedStatement getBlacklistedEmojiIdsStmt;
+    private final PreparedStatement getEmojiUsageTotalStmt;
 
     // Message statements
     private final PreparedStatement insertMessageStmt;
@@ -51,6 +52,7 @@ public class Database implements AutoCloseable {
     private final PreparedStatement getReactionCountStmt;
     private final PreparedStatement getReactLeaderboardStmt;
     private final PreparedStatement getReactionEmojiStmt;
+    private final PreparedStatement getReactionGrandTotalStmt;
 
     // Reactboard statements
     private final PreparedStatement setReactboardStmt;
@@ -67,6 +69,7 @@ public class Database implements AutoCloseable {
     private final PreparedStatement getUserReactionLeaderboardStmt;
     private final PreparedStatement getUserReactionTotalStmt;
     private final PreparedStatement getUserEmojiStatsStmt;
+    private final PreparedStatement getUserReactionGrandTotalStmt;
 
     public Database(String uri) throws SQLException {
         connection = DriverManager.getConnection(uri);
@@ -118,6 +121,8 @@ public class Database implements AutoCloseable {
                 "SELECT id, times_used FROM EMOJI WHERE guild = ? AND blacklisted = FALSE ORDER BY times_used DESC LIMIT ?");
         getBlacklistedEmojiIdsStmt = connection.prepareStatement(
                 "SELECT id FROM EMOJI WHERE guild = ? AND blacklisted = TRUE");
+        getEmojiUsageTotalStmt = connection.prepareStatement(
+                "SELECT SUM(times_used) AS total FROM EMOJI WHERE guild = ? AND blacklisted = FALSE");
 
         // Message
         insertMessageStmt = connection.prepareStatement(
@@ -137,6 +142,11 @@ public class Database implements AutoCloseable {
                 "ORDER BY r.count DESC LIMIT ?");
         getReactionEmojiStmt = connection.prepareStatement(
                 "SELECT emoji FROM REACTION WHERE message = ?");
+        getReactionGrandTotalStmt = connection.prepareStatement(
+                "SELECT SUM(r.count) AS total FROM REACTION r " +
+                "JOIN MESSAGES m ON r.message = m.id " +
+                "JOIN CHANNEL c ON m.channel = c.id " +
+                "WHERE c.guild = ?");
 
         // Reactboard
         setReactboardStmt = connection.prepareStatement(
@@ -172,6 +182,8 @@ public class Database implements AutoCloseable {
                 "SELECT total FROM USER_REACTIONS WHERE user_id = ? AND guild_id = ?");
         getUserEmojiStatsStmt = connection.prepareStatement(
                 "SELECT emoji_id, count FROM USER_EMOJI_STATS WHERE user_id = ? AND guild_id = ? ORDER BY count DESC LIMIT ?");
+        getUserReactionGrandTotalStmt = connection.prepareStatement(
+                "SELECT SUM(total) AS grand_total FROM USER_REACTIONS WHERE guild_id = ?");
     }
 
     public void ensureGuild(long guildId) {
@@ -614,6 +626,42 @@ public class Database implements AutoCloseable {
         return results;
     }
 
+    public long getEmojiUsageTotal(long guildId) {
+        try {
+            getEmojiUsageTotalStmt.setLong(1, guildId);
+            try (ResultSet rs = getEmojiUsageTotalStmt.executeQuery()) {
+                if (rs.next()) return rs.getLong("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public long getReactionGrandTotal(long guildId) {
+        try {
+            getReactionGrandTotalStmt.setLong(1, guildId);
+            try (ResultSet rs = getReactionGrandTotalStmt.executeQuery()) {
+                if (rs.next()) return rs.getLong("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public long getUserReactionGrandTotal(long guildId) {
+        try {
+            getUserReactionGrandTotalStmt.setLong(1, guildId);
+            try (ResultSet rs = getUserReactionGrandTotalStmt.executeQuery()) {
+                if (rs.next()) return rs.getLong("grand_total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     @Override
     public void close() {
         try {
@@ -623,13 +671,13 @@ public class Database implements AutoCloseable {
                     ensureUserStmt, isBlacklistedStmt, setBlacklistedStmt,
                     ensureOptoutsStmt,
                     ensureEmojiStmt, isEmojiBlacklistedStmt, setEmojiBlacklistedStmt,
-                    incrementEmojiUsageStmt, getEmojiLeaderboardStmt, getBlacklistedEmojiIdsStmt,
+                    incrementEmojiUsageStmt, getEmojiLeaderboardStmt, getBlacklistedEmojiIdsStmt, getEmojiUsageTotalStmt,
                     insertMessageStmt,
-                    upsertReactionStmt, getReactionCountStmt, getReactLeaderboardStmt, getReactionEmojiStmt,
+                    upsertReactionStmt, getReactionCountStmt, getReactLeaderboardStmt, getReactionEmojiStmt, getReactionGrandTotalStmt,
                     setReactboardStmt, getReactboardForGuildStmt, removeReactboardStmt,
                     insertQuoteTamperStmt, getQuoteTamperStmt,
                     incrementUserReactionStmt, upsertUserEmojiStatStmt,
-                    getUserReactionLeaderboardStmt, getUserReactionTotalStmt, getUserEmojiStatsStmt
+                    getUserReactionLeaderboardStmt, getUserReactionTotalStmt, getUserEmojiStatsStmt, getUserReactionGrandTotalStmt
             };
             for (PreparedStatement stmt : stmts) {
                 if (stmt != null) stmt.close();

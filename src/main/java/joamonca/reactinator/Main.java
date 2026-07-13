@@ -20,7 +20,11 @@ public class Main
         String token = System.getenv("TOKEN");
         String authorizedUser = System.getenv("AUTHORIZED_USER");
         String dbUri = System.getenv("DB_URI");
-        String soundsSource = System.getenv("FETCH_URL");
+        String soundsSource = System.getenv("SOUNDBOARD_URL");
+        String copypastaSource = System.getenv("COPYPASTA_URL");
+        if (copypastaSource == null || copypastaSource.isEmpty()) {
+            copypastaSource = soundsSource;
+        }
         String slashVer = System.getenv("SLASH_COMMANDS_VERSION");
 
         EnumSet<GatewayIntent> intents = EnumSet.of(
@@ -39,7 +43,7 @@ public class Main
             JDA jda = JDABuilder.createLight(token, intents)
                     .enableCache(CacheFlag.EMOJI)
                     .addEventListeners(new MessageHandler(database, soundsSource, slashVer))
-                    .addEventListeners(new SlashCommandsHandler(database, authorizedUser, soundsSource))
+                    .addEventListeners(new SlashCommandsHandler(database, authorizedUser, soundsSource, copypastaSource))
                     .addEventListeners(new ReactionHandler(database))
                     .setActivity(Activity.customStatus("behold the reactinator!!!"))
                     .setStatus(OnlineStatus.IDLE)

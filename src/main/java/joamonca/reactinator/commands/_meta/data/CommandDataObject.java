@@ -7,5 +7,6 @@ public record CommandDataObject(
         Event event,
         Database database,
         String ownerID,
-        String soundsSource
+        String soundsSource,
+        String copypastaSource
 ) {}

@@ -10,11 +10,13 @@ public class SlashCommandsHandler extends ListenerAdapter {
     private final Database database;
     private final String authorized;
     private final String soundsSource;
+    private final String copypastaSource;
 
-    public SlashCommandsHandler(Database database, String authorized, String soundsSource) {
+    public SlashCommandsHandler(Database database, String authorized, String soundsSource, String copypastaSource) {
         this.authorized = authorized;
         this.database = database;
         this.soundsSource = soundsSource;
+        this.copypastaSource = copypastaSource;
     }
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
@@ -22,6 +24,6 @@ public class SlashCommandsHandler extends ListenerAdapter {
             event.reply("you are blacklisted from using this bot. what have you done?").setEphemeral(true).queue();
             return;
         }
-        new SlashDispatcher(event, database, authorized, soundsSource);
+        new SlashDispatcher(event, database, authorized, soundsSource, copypastaSource);
     }
 }
