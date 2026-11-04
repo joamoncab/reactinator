@@ -18,23 +18,19 @@ jobs:
       matrix:
         include:
           - rid: linux-x64
-            os: ubuntu-latest
+            os: ubuntu-24.04
           - rid: linux-arm64
             os: ubuntu-24.04-arm
           - rid: win-x64
             os: windows-latest
           - rid: win-arm64
             os: windows-11-arm
-          - rid: osx-x64
-            os: macos-15-intel
-          - rid: osx-arm64
-            os: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
 
@@ -46,7 +42,7 @@ jobs:
         run: dotnet publish -c Release -r ${{ matrix.rid }} --self-contained
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: reactinator-${{ matrix.rid }}
           path: |

@@ -66,11 +66,11 @@ TOKEN=discord-token
 - `/refreshcommands` — refresh slash commands (bot owner only)
 
 ## Building
-You need the .NET 10 SDK. Native AOT also needs clang on Linux, MSVC on Windows, or Xcode command line tools on macOS (see the [native AOT prerequisites](https://aka.ms/nativeaot-prerequisites)).
+You need the .NET 10 SDK. Native AOT also needs clang on Linux or MSVC on Windows (see the [native AOT prerequisites](https://aka.ms/nativeaot-prerequisites)).
 ```
 dotnet run                                      # just run it
 dotnet publish -c Release -r linux-x64          # native binary for linux x64
-dotnet publish -c Release -r <rid>              # also linux-arm64, win-x64, win-arm64, osx-x64 or osx-arm64
+dotnet publish -c Release -r <rid>              # also linux-arm64, win-x64 or win-arm64
 ```
 
 GitHub Actions builds all supported RIDs on their native runners and uploads one artifact per platform.
