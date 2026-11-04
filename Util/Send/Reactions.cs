@@ -84,8 +84,17 @@ public static class Reactions
         // two reactions arrived at once and the other one won the race, keep its message instead
         if (await database.GetReactboardMessage(messageId) is { } existing)
         {
-            await target.DeleteMessageAsync(sent.Id);
-            await target.ModifyMessageAsync(existing, options => options.Content = content);
+            try
+            {
+                await target.ModifyMessageAsync(existing, options => options.Content = content);
+                await target.DeleteMessageAsync(sent.Id);
+            }
+            catch (RestException e) when (e.Error?.Code == UnknownMessage)
+            {
+                // the winner got deleted too, so ours takes its place (you never hate race conditions enough)
+                await database.ClearReactboardMessage(messageId);
+                await database.ClaimReactboardMessage(messageId, sent.Id);
+            }
         }
     }
 }
