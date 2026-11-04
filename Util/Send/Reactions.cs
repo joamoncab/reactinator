@@ -87,14 +87,15 @@ public static class Reactions
             try
             {
                 await target.ModifyMessageAsync(existing, options => options.Content = content);
-                await target.DeleteMessageAsync(sent.Id);
             }
             catch (RestException e) when (e.Error?.Code == UnknownMessage)
             {
                 // the winner got deleted too, so ours takes its place (you never hate race conditions enough)
                 await database.ClearReactboardMessage(messageId);
                 await database.ClaimReactboardMessage(messageId, sent.Id);
+                return;
             }
+            await target.DeleteMessageAsync(sent.Id);
         }
     }
 }
