@@ -1,0 +1,52 @@
+name: build
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: ${{ matrix.rid }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: linux-x64
+            os: ubuntu-24.04
+          - rid: linux-arm64
+            os: ubuntu-24.04-arm
+          - rid: win-x64
+            os: windows-latest
+          - rid: win-arm64
+            os: windows-11-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Install Native AOT prerequisites
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang zlib1g-dev
+
+      - name: Publish native binary
+        run: dotnet publish -c Release -r ${{ matrix.rid }} --self-contained
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: reactinator-${{ matrix.rid }}
+          path: |
+            bin/Release/net10.0/${{ matrix.rid }}/publish/
+            !bin/Release/net10.0/${{ matrix.rid }}/publish/**/*.pdb
+            !bin/Release/net10.0/${{ matrix.rid }}/publish/**/*.dbg
+          if-no-files-found: error

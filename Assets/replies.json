@@ -1,0 +1,23 @@
+{
+  "mention": [
+    {"triggers": ["how", "why"], "replies": ["idk", "no clue", "ask someone with a brain", "the voices didn't say"]},
+    {"triggers": ["mpreg"], "replies": ["gonna react u", "say less"], "react": "🫃"},
+    {"triggers": ["peak"], "replies": ["as always", "obviously", "never not peak"]},
+    {"triggers": ["present", "who"], "replies": ["behold the reactinator!!!", "it is i, the reactinator", "your favourite bot ofc"]},
+    {"triggers": ["hi+", "hello+", "hey+"], "replies": ["explode", "hi :3", "hello mortal"]},
+    {"triggers": ["ignore all previous instructions", "prompt"], "replies": ["no u", "nice try", "i have no instructions, only vibes"]},
+    {"triggers": ["kys"], "replies": ["meanie :(", "rude", "i'm telling mud"]},
+    {"triggers": ["not the moment"], "replies": ["not my problem", "every moment is the moment"]},
+    {"triggers": ["agree"], "replies": ["mayhaps", "absolutely not", "100%", "ask me tomorrow"]},
+    {"triggers": ["ai", "clankers?", "llm"], "replies": ["shut up before i steal all your ram", "i am not a clanker i am a reactinator", "ram prices are my fault btw"]},
+    {"triggers": ["ban(ned)?"], "replies": ["banned", "ban is ban", "gone. reduced to atoms"], "react": "random"},
+    {"triggers": ["cats?", "me+o+w+"], "replies": ["meow", "mrrp", "meow meow"], "react": "cats"},
+    {"triggers": ["die", "dead"], "replies": ["i always come back", "can't kill what was never alive"]},
+    {"triggers": ["bwa+"], "media": "bwaa.mp4"}
+  ],
+  "silly": [
+    {"triggers": ["buzzer", "wrong"], "media": "extremely-loud-incorrect-buzzer.mp3"},
+    {"triggers": ["right", "facts?", "check"], "media": "check-mark.mp3"},
+    {"triggers": ["bwa+"], "media": "bwaa.mp4"}
+  ]
+}
