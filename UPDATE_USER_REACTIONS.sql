@@ -1,5 +1,5 @@
--- User reaction tracking tables
-CREATE TABLE USER_REACTIONS
+-- upgrade path for databases created before user reaction tracking
+CREATE TABLE IF NOT EXISTS USER_REACTIONS
 (
     user_id  BIGINT NOT NULL,
     guild_id BIGINT NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE USER_REACTIONS
     FOREIGN KEY (guild_id) REFERENCES GUILDS (id) ON DELETE CASCADE
 );
 
-CREATE TABLE USER_EMOJI_STATS
+CREATE TABLE IF NOT EXISTS USER_EMOJI_STATS
 (
     user_id  BIGINT NOT NULL,
     guild_id BIGINT NOT NULL,
